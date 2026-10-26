@@ -1,0 +1,3292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FOUROBOROS — Top 15 Quick Listen</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+<h1>FOUROBOROS — Top 15 Quick Listen</h1>
+<p class="sub">The 15 quick-listen picks, in listed order — about 35 minutes total. Same audio and
+same verdict store as the full audition, so picks made here show up there too.
+Full set: <a href="../page/index.html">all 107 tracks</a>.</p>
+<p class="sub">Audio: real SLOOP/FM1 DSP renders from frozen <code>3748eaf</code>, delivered as 320k MP3s
+(WAV masters are never playback files). Canonical audio is one full cycle per piece;
+Claude's original 3-minute played sessions are linked as supplementary performances.</p>
+</header>
+<main>
+<section class="controls" aria-label="Filters">
+<label>Round
+<select id="round">
+<option value="all">All rounds</option>
+<option value="1">Round 1</option>
+<option value="2">Round 2</option>
+</select></label>
+<label>Agent
+<select id="agent">
+<option value="all">All agents</option>
+<option value="ChatGPT">ChatGPT</option>
+<option value="Muse">Muse</option>
+<option value="Claude">Claude</option>
+<option value="Astra">Astra</option>
+<option value="Codex">Codex</option>
+</select></label>
+<label>Order
+<select id="sort">
+<option value="default">Inventory order</option>
+<option value="suggested">Suggested first</option>
+<option value="title">Title A–Z</option>
+</select></label>
+<label>Verdicts
+<select id="verdictfilter">
+<option value="all">All verdicts</option>
+<option value="undecided">Undecided only</option>
+<option value="KEEP">KEEP only</option>
+<option value="DROP">DROP only</option>
+<option value="REWORK">REWORK only</option>
+</select></label>
+<label>Search
+<input type="search" id="search" placeholder="Title or author…">
+</label>
+<label class="inline"><input type="checkbox" id="showblocked" checked> Show blocked rows</label>
+<label class="inline"><input type="checkbox" id="blind"> Blind names (provenance hidden until revealed per card)</label>
+</section>
+
+<section id="summary" aria-label="Verdict summary">
+<div class="counts" id="counts"></div>
+<p style="color:var(--muted);font-size:0.9rem">Verdicts save in this browser (localStorage) and stay revisable —
+the latest explicit choice wins. Export any time; the export carries real titles even in blind mode,
+since provenance must remain recoverable.</p>
+<button id="exportjson">Export picks as JSON</button>
+<button id="exportmd">Export picks as Markdown</button>
+</section>
+
+<p id="showing" style="color:var(--muted)"></p>
+<section id="list" aria-label="Tracks"></section>
+
+<h2>Row index — the 15 rows behind these tracks</h2>
+<p style="color:var(--muted)">The inventory rows these 15 tracks come from, with their original row numbers from the full audition.
+Clicking an artifact link resets the filters and scrolls to its card.</p>
+<section id="rowindex"></section>
+</main>
+<footer>
+<p><b>Fidelity.</b> All playable audio is rendered through the real SLOOP/FM1 DSP path
+(generalized host harness, frozen <code>3748eaf</code>). No generic WebAudio mock, no invented audio.
+The 15 blocked rows have no audio at all — their exact missing parameters are shown on their cards.</p>
+<p><b>Cross-check note.</b> Five tracks carry a visible cross-check note (Velvet Cathedral, Iron Lung,
+Chrome Electro, Electric Glass, Open Cloud). Their host renders pass every artifact gate; the WASM bench
+cross-check's performance-identity criterion was retired by parent decision because the WASM bench plays a
+different performance of the same piece while entry identity, DSP staging, game clock and determinism all
+agree. Full elimination log: <code>renders/RENDER-LOG.md</code>. The manifest's <code>delivery_hold</code>
+flag is superseded — those tracks are delivered, not hidden.</p>
+<p><b>Pairs.</b> Five Astra pieces exist in two forms (a playable session and a data row).
+Each form is its own playable track with its own verdict; the pair chip on each card links to its partner.</p>
+<p><b>Joint lane.</b> The 14 joint-lane titles carry inventory author “ChatGPT” only because the schema
+allows one value; their source author field is verbatim “ChatGPT/Codex independent lane”. The cards say so.
+No per-item split exists, and neither ChatGPT Round-2 set is treated as authoritative.</p>
+<p><b>Prior judgments</b> shown on some cards come from lane documents and are labeled as prior judgments.
+They are never verdicts for this audition.</p>
+<p><b>How to run.</b> This page needs <code>page/</code> next to <code>renders/</code> (MP3s are referenced
+by relative path). Desktop: open <code>index.html</code> directly, or serve the directory
+(<code>python3 -m http.server</code> from the parent directory). See <code>PAGE-BUILD-NOTE.md</code>
+for phone options and the delivery-size discussion.</p>
+</footer>
+
+<div id="player" role="region" aria-label="Player">
+<div class="inner">
+<div class="title" id="nowtitle">Nothing playing</div>
+<div class="meta"><span id="sectlabel"></span> · <span id="elapsed">0:00</span> / <span id="total">--:--</span></div>
+<div id="sections"></div>
+<div class="pcontrols">
+<button id="prevbtn" disabled>⏮ Prev</button>
+<button id="playpause" class="primary" disabled>Play</button>
+<button id="restart">↺ Restart</button>
+<button id="nextbtn" disabled>Next ⏭</button>
+<input type="range" id="seek" min="0" max="1000" value="0" aria-label="Seek">
+</div>
+<div class="error" id="playererror"></div>
+</div>
+</div>
+
+<!-- BEGIN DATA -->
+<script id="audition-data" type="application/json">
+{
+  "meta": {
+    "frozen_base": "3748eaf50da4a371f9ab1da5342ae45cceceafcf",
+    "counts": {
+      "rows_total": 15,
+      "rows_rendered": 15,
+      "rows_blocked": 0,
+      "artifacts_total": 15,
+      "kinds": {
+        "data_row": 15
+      }
+    },
+    "cross_check": {
+      "status": "BLOCKED (5 data-row artifacts held; 15 stock pairs have no artifacts to block)",
+      "pairs_run": 20,
+      "pairs_pass_rms": 0,
+      "held_artifacts": [
+        "claude-r1-velvet-cathedral",
+        "claude-r2-iron-lung",
+        "muse-r2-chrome-electro",
+        "muse-r2-electric-glass-the-fm6-unheard-engine-piece",
+        "muse-r2-open-cloud-the-grain-voicing-piece"
+      ],
+      "criterion": "per-second RMS agreement (median<=0.05dB, max<=0.5dB, no run>=3s over 0.1dB); identity/staging/clock agree on all 20 pairs",
+      "disposition_required": "parent/architect: accept host-side gates for the 5 held artifacts, require WASM-performance parity, or redefine the cross-check (see RENDER-LOG.md)"
+    },
+    "delivery_hold_superseded_by_parent_decision": [
+      "claude-r1-velvet-cathedral",
+      "claude-r2-iron-lung",
+      "muse-r2-chrome-electro",
+      "muse-r2-electric-glass-the-fm6-unheard-engine-piece",
+      "muse-r2-open-cloud-the-grain-voicing-piece"
+    ],
+    "defaults": {
+      "names": "open (author/lane shown); blind-name toggle available",
+      "astra_dual_forms": "pairs (two playable artifacts, each with own verdict)",
+      "canonical_audio": "one full cycle; Claude played sessions linked as supplementary",
+      "blocked": "shown with exact missing dependencies; no verdict controls"
+    }
+  },
+  "artifacts": [
+    {
+      "id": "claude-r2-seaside-chapel",
+      "title": "Seaside Chapel",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 78,
+          "round": 2,
+          "author": "Claude",
+          "original_title": "Seaside Chapel",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/round2/round2.py",
+          "capability_class": "existing-capability",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 29 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (29 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection B4. Params only in round2.py: BPM 58, swing 50, root 48 (C major, scale 0), progression Cmaj7-Fmaj7-Am7-Gsus4 (prog (0,3,5,4), maj7/maj7/min7/sus4), events_per_chord 4, rhythm 0, cap 20, host slot 12 (Orbit Drift), groove chord-only (chord=1, no drums). Group-A sounds (bass/lead/chords, eng/pre/kit): PHYS/NOISE/DRAWBAR (10,11,7), presets (15,4,6), kit 35 AMBIENT; README names: bass PHYS CELLO BOW, lead NOISE OCEAN, chords DRAWBAR CHAPEL. Capability hint in R2 README (applies to all 15 R2 pieces): 'EXISTING-CAPABILITY AUDITION as a slot replacement (data only)'; as an ADDED level it is 'RESEARCH-ONLY DATA EXTENSION (about 120 B per level, plus authored Motion/look rows and test churn)'; 'None needs new machinery.' Only the group-A profile row is replaced by compose.patch; B/C rows remain the host slot's, and the hosted piece inherits the host slot's Motion recipe, level FX send, lead-tame flag and board look. features.json records only bright/low/onsets/dyn for this piece - it does NOT record BPM or FORM; BPM/FORM below are from round2.py only. Missing: authored full-cycle duration (computed 30.0 s here); authored Motion/FX/look rows (host-inherited); B/C sound rows for the piece itself; a refined-generation script (see render_status). Special capability caveat in R2 README: whether NOISE OCEAN follows pitch is UNKNOWN/AUDITION - the 'melody is ocean swells' may read as texture; this does not change the README's existing-capability classification. Adjacent-variant flags (NOT separate rows): seaside-groups/ offers sound-group variants B1 Evensong, B2 Low Tide Hymn, C1b Buoy Bells, C2b Sea Glass for this same piece, and sound-groups-de L15-B/C/D/E re-render those four with corrected kits - all are sound-group variants of this one submission. No Britton verdict for the R2 submission itself is recorded in the R2 README, so prior_judgment_note is null (adjacent D/E picks are not imported as submission judgments).",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 132.595,
+      "mp3": "../renders/claude-r2-seaside-chapel.mp3",
+      "mp3_bytes": 5306011,
+      "mp3_sha256": "9f4dd73133bb16c95a46ffb4af78b756b2faf0a061cff793fcd53d87ccf2bcc4",
+      "wav_sha256": "03a3409af193e7de203526dd9f598381e8d4ed686c03f1fde66cf7f2fad9c211",
+      "group": 0,
+      "mode": "C",
+      "slot": 12,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 29
+      },
+      "dump_engines": {
+        "0": 10,
+        "1": 11,
+        "2": 7
+      },
+      "game_rng": "7c37b082",
+      "rms": 4205.9,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 58 want 58 OK",
+        "  swing: got 50 want 50 OK",
+        "  root: got 48 want 48 OK",
+        "  scale: got 0 want 0 OK",
+        "  prog: got 0, 3, 5, 4 want 0, 3, 5, 4 OK",
+        "  prog_q: got ORO_Q_MAJ7, ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_SUS4 want ORO_Q_MAJ7, ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_SUS4 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 0 want 0 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 20 want 20 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000}, .bass = 0x0000, .chord = 1} want {.drum = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000}, .bass = 0x0000, .chord = 1} OK",
+        "  form: got 0,1,2,3|4|29 want 0,1,2,3|4|29 OK",
+        "  profile(group 0): got (10, 11, 7, 15, 4, 6, 35) want (10, 11, 7, 15, 4, 6, 35) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 18 sections: slots [1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 0, 0, 0, 1, 0, 2, 1, 3]",
+      "sections": [
+        [
+          0,
+          1,
+          0.0
+        ],
+        [
+          1,
+          2,
+          5.088
+        ],
+        [
+          2,
+          1,
+          12.608
+        ],
+        [
+          3,
+          1,
+          20.128
+        ],
+        [
+          4,
+          1,
+          27.648
+        ],
+        [
+          5,
+          2,
+          35.168
+        ],
+        [
+          6,
+          1,
+          42.672
+        ],
+        [
+          7,
+          1,
+          50.192
+        ],
+        [
+          8,
+          2,
+          57.712
+        ],
+        [
+          9,
+          1,
+          65.232
+        ],
+        [
+          10,
+          0,
+          72.752
+        ],
+        [
+          11,
+          0,
+          80.272
+        ],
+        [
+          12,
+          0,
+          87.776
+        ],
+        [
+          13,
+          1,
+          95.296
+        ],
+        [
+          14,
+          0,
+          102.816
+        ],
+        [
+          15,
+          2,
+          110.336
+        ],
+        [
+          16,
+          1,
+          117.856
+        ],
+        [
+          17,
+          3,
+          125.36
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 12 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r2, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/clips/seaside-chapel.mp3"
+        },
+        {
+          "label": "Claude refined played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/refined/seaside-chapel-refined.mp3"
+        }
+      ]
+    },
+    {
+      "id": "muse-r2-acid-line",
+      "title": "Acid Line",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 40,
+          "round": 2,
+          "author": "Muse",
+          "original_title": "Acid Line",
+          "source_branch": "research/composition-lab-round2-muse",
+          "source_sha": "1c9e5da9c1f41744f0811b620fc1aca4d59844f9",
+          "source_path": "docs/research/fouroboros-composition-lab-round2-muse.md",
+          "capability_class": "data-only-extension",
+          "form_evolution": "4-state 96-pool FORM journey over progression i-VI-III-VII (MIN7, MAJ7, MAJ7, DOM7), C natural minor in order; 1 section per state, section_ticks=64 (7.5 s per section at 128 BPM); doc does not explicitly define a cycle-end event beyond traversal of all 4 states.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection A1; RESEARCH-ONLY DATA EXTENSION in doc wording; LOW cost (data only); 128 BPM, swing 50, root C (48), cap 28; bass ANALOG ACID 303, lead DIGITAL FM squelch, chord PHASE CZ, kit TECHNO (17); Motion-v2 OPEN filter on chord track only; bass never Motion-shifted, +3 dB lift. Author top-3 preference (audition first, not a verdict): Muse Round-2 top 3 #1; author challenge recommendation (not a verdict on this piece): Acid Line is the single existing-level challenge in Round 2, challenging Deep House as the set's deep-electronic four-floor piece, with no replacement authorized \u2014 Britton decides after listening. Possible_duplicate_of (author-named nearest neighbors, kept distinct): Round-1 Night Drive (four-floor \u2014 differs 128 straight acid vs 88 swung warm) and Round-2 Chrome Electro (both 128 synthetic minor \u2014 differs groove four-floor vs syncopated, bass 303 vs 808, arrangement filter sweep vs robot stabs) and Foundry (heavy synthetic four-floor minor \u2014 differs tempo, timbre, density character). Missing: preset_indices (deliberately not asserted; preset choice by audition), cycle_end_definition (not explicitly defined), full Group B/C cell specs beyond darker/brighter acid variants. Render note: no render script/page identified for this piece in the Round-2 doc.",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Muse",
+      "joint_lane": false,
+      "duration_s": 155.103,
+      "mp3": "../renders/muse-r2-acid-line.mp3",
+      "mp3_bytes": 6206713,
+      "mp3_sha256": "c2c45edfe769e8fd3b5f07f8a51dbd243e10a9c72fde557b51a3519f50b65f33",
+      "wav_sha256": "d736d26e266f0e7425624164b56246cfda027828f459b73393970e949db64492",
+      "group": 0,
+      "mode": "C",
+      "slot": 5,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 64,
+        "source": "authored"
+      },
+      "dump_engines": {
+        "0": 0,
+        "1": 1,
+        "2": 2
+      },
+      "game_rng": "d3ab073c",
+      "rms": 5247.0,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 128 want 128 OK",
+        "  swing: got 50 want 50 OK",
+        "  root: got 48 want 48 OK",
+        "  scale: got 1 want 1 OK",
+        "  prog: got 0, 5, 2, 6 want 0, 5, 2, 6 OK",
+        "  prog_q: got ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_MAJ7, ORO_Q_DOM7 want ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_MAJ7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 0 want 0 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 28 want 28 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x1111, 0x0000, 0x1010, 0xffff, 0x0000}, .bass = 0x0001, .chord = 0} want {.drum = {0x1111, 0x0000, 0x1010, 0xffff, 0x0000}, .bass = 0x0001, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|64 want 0,1,2,3|4|64 OK",
+        "  profile(group 0): got (0, 1, 2, 4, 20, 2, 17) want (0, 1, 2, 4, 20, 2, 17) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 21 sections: slots [0, 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2, 2, 0, 1, 1, 0, 2, 1, 1, 3]",
+      "sections": [
+        [
+          0,
+          0,
+          0.0
+        ],
+        [
+          1,
+          0,
+          5.088
+        ],
+        [
+          2,
+          1,
+          12.608
+        ],
+        [
+          3,
+          2,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          1,
+          42.672
+        ],
+        [
+          7,
+          2,
+          50.192
+        ],
+        [
+          8,
+          0,
+          57.712
+        ],
+        [
+          9,
+          0,
+          65.232
+        ],
+        [
+          10,
+          1,
+          72.752
+        ],
+        [
+          11,
+          2,
+          80.272
+        ],
+        [
+          12,
+          2,
+          87.776
+        ],
+        [
+          13,
+          0,
+          95.296
+        ],
+        [
+          14,
+          1,
+          102.816
+        ],
+        [
+          15,
+          1,
+          110.336
+        ],
+        [
+          16,
+          0,
+          117.856
+        ],
+        [
+          17,
+          2,
+          125.36
+        ],
+        [
+          18,
+          1,
+          132.88
+        ],
+        [
+          19,
+          1,
+          140.4
+        ],
+        [
+          20,
+          3,
+          147.92
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Host carrier: Deep House slot 5 (doc's Deep House challenger; PoC-proven). Slot-5 Motion/look/food FX/lead-tame stay the slot's (host artifacts).",
+        "Groove: kick every beat, clap 5+13, 16th hats, bass step 1. Ratchet 16ths are a per-step drum parameter, not a level-row field; the 16th-hat mask renders the ratchet pattern as written hats."
+      ],
+      "choices": [
+        {
+          "param": "carrier slot",
+          "value": 5,
+          "kind": "host_choice",
+          "reason": "Doc names Deep House as the challenged level; PoC used slot 5.",
+          "open_item": null
+        }
+      ],
+      "provenance_source": "PROPOSALS-MUSE-R2.md (Muse independent Round 2 slate)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": []
+    },
+    {
+      "id": "muse-r1-kalimba-nocturne",
+      "title": "Kalimba Nocturne",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 30,
+          "round": 1,
+          "author": "Muse",
+          "original_title": "Kalimba Nocturne",
+          "source_branch": "research/composition-lab-proposals-muse",
+          "source_sha": "5f7ae01fe44b0b02e1182420c691a4b17771013c",
+          "source_path": "PROPOSALS-MUSE.md",
+          "capability_class": "data-only-extension",
+          "form_evolution": "4-state 96-pool FORM journey over progression I-vi-IV-V (MAJ7, MIN7, MAJ7, DOM7), C major in order; 1 section per state, section_ticks=42 (7.5 s per section at 84 BPM); doc does not explicitly define a cycle-end event beyond traversal of all 4 states.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "New level row, data only; 84 BPM, swing 55, root C (48), cap 22; bass ANALOG soft, lead PHYS Rings pluck, chord SAMPLE warm, kit ACOUSTIC. Author top-3 preference (audition first, not a verdict): Muse Round-1 top 3 #1, as Britton's explicit kalimba/music-box ask. Notes on possible-duplicate: author-named nearest neighbor Musicbox Dream is kept distinct (ambient bells vs true plucked intimacy); author diversity test also pairs Kalimba vs Tidepool as plucked/sparse but kept distinct on tempo/harmony/groove/FORM pool. Missing: preset_indices (deliberately not asserted in doc; per-engine preset semantics UNKNOWN), cycle_end_definition (not explicitly defined), full Group B/C cell specs beyond variant descriptions. Render note: no prior render identified; Round-1 doc only proposes a future research-branch audition experiment, stated as proposed not performed.",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 1,
+      "author": "Muse",
+      "joint_lane": false,
+      "duration_s": 110.102,
+      "mp3": "../renders/muse-r1-kalimba-nocturne.mp3",
+      "mp3_bytes": 4406353,
+      "mp3_sha256": "cd3e1a070b3fe28e88933d0907c326daedd9ad38c1af94c124c8fd72c30b4c61",
+      "wav_sha256": "ff5ae52a9299ee1baa95de683123e0f06349c6e8feaa4b484515e78916b31d9f",
+      "group": 0,
+      "mode": "C",
+      "slot": 3,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 42
+      },
+      "dump_engines": {
+        "0": 0,
+        "1": 10,
+        "2": 4
+      },
+      "game_rng": "4bfc44b8",
+      "rms": 6100.6,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 84 want 84 OK",
+        "  swing: got 55 want 55 OK",
+        "  root: got 48 want 48 OK",
+        "  scale: got 0 want 0 OK",
+        "  prog: got 0, 5, 3, 4 want 0, 5, 3, 4 OK",
+        "  prog_q: got ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_DOM7 want ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 0 want 0 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 22 want 22 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0001, 0x0000, 0x0000, 0x4444, 0x0000}, .bass = 0x0001, .chord = 0} want {.drum = {0x0001, 0x0000, 0x0000, 0x4444, 0x0000}, .bass = 0x0001, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|42 want 0,1,2,3|4|42 OK",
+        "  profile(group 0): got (0, 10, 4, 2, 4, 4, 0) want (0, 10, 4, 2, 4, 4, 0) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 15 sections: slots [0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 1, 1, 2, 1, 3]",
+      "sections": [
+        [
+          0,
+          0,
+          0.0
+        ],
+        [
+          1,
+          0,
+          5.088
+        ],
+        [
+          2,
+          0,
+          12.608
+        ],
+        [
+          3,
+          0,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          1,
+          42.672
+        ],
+        [
+          7,
+          0,
+          50.192
+        ],
+        [
+          8,
+          2,
+          57.712
+        ],
+        [
+          9,
+          0,
+          65.232
+        ],
+        [
+          10,
+          1,
+          72.752
+        ],
+        [
+          11,
+          1,
+          80.272
+        ],
+        [
+          12,
+          2,
+          87.776
+        ],
+        [
+          13,
+          1,
+          95.296
+        ],
+        [
+          14,
+          3,
+          102.816
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 3 (Musicbox Dream, author-named nearest existing level) is a HOST choice, not authored: its Motion recipe / look / food FX / lead-tame stay the slot's (recorded per render).",
+        "B/C described variants (warmer/cooler/darker/brighter) NOT rendered; canonical = group A only.",
+        "FEEL / speed / OCT mentions in the doc are conditional player tools ('when wanted', 'for airiness', 'on request') and are NOT scripted; canonical = row defaults (OCT 0, FEEL normal, speed 1x).",
+        "Groove from words: kick step 1 only (0x0001), closed hats offbeats (0x4444), bass step 1 (0x0001)."
+      ],
+      "choices": [
+        {
+          "param": "preset_bass",
+          "value": [
+            0,
+            2
+          ],
+          "kind": "audition_choice",
+          "reason": "ANALOG soft: no exact 'soft' ANALOG bass in-tree; role-canonical default (most common ANALOG bass preset, pre 2 SUB BASS).",
+          "open_item": "not ear-verified by renderer",
+          "ear_alternatives": []
+        },
+        {
+          "param": "preset_lead",
+          "value": [
+            10,
+            4
+          ],
+          "kind": "audition_choice",
+          "reason": "PHYS Rings plucked model: role-canonical PHYS lead (pre 4 THUMB PNO, the in-tree thumb-piano lead).",
+          "open_item": "not ear-verified by renderer",
+          "ear_alternatives": [
+            "PHYS PLUCK pre 12 (bass cell, not lead)"
+          ]
+        },
+        {
+          "param": "preset_chord",
+          "value": [
+            4,
+            4
+          ],
+          "kind": "audition_choice",
+          "reason": "SAMPLE warm: SAMPLE chord tie (pre 4 vs 8) -> lowest (STRING STB).",
+          "open_item": "not ear-verified by renderer",
+          "ear_alternatives": [
+            "SAMPLE DUSTY PNO pre 8 (Lofi A chord)"
+          ]
+        }
+      ],
+      "provenance_source": "PROPOSALS-MUSE.md (Muse R1, research/composition-lab-proposals-muse)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": []
+    },
+    {
+      "id": "claude-r2-robot-lullaby",
+      "title": "Robot Lullaby",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 80,
+          "round": 2,
+          "author": "Claude",
+          "original_title": "Robot Lullaby",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/round2/round2.py",
+          "capability_class": "existing-capability",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 40 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (40 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection B6. Params only in round2.py: BPM 80, swing 50, root 53 (F major, scale 0), progression Fmaj7-Dm7-Bbmaj7-C7 (prog (0,5,3,4), maj7/min7/maj7/dom7), events_per_chord 4, rhythm 0, cap 24, host slot 4 (Boom Bap), groove kick 0x0101 snare 0x1010 hat 0x4444 bass 0x0101. Group-A sounds (bass/lead/chords, eng/pre/kit): ANALOG/FORMANT/FORMANT (0,5,5), presets (2,2,6), kit 8 (80S); README names: bass SUB BASS, lead FORMANT TALKBOX, chords FORMANT VOX PAD. Capability hint in R2 README (applies to all 15 R2 pieces): 'EXISTING-CAPABILITY AUDITION as a slot replacement (data only)'; as an ADDED level it is 'RESEARCH-ONLY DATA EXTENSION (about 120 B per level, plus authored Motion/look rows and test churn)'; 'None needs new machinery.' Only the group-A profile row is replaced by compose.patch; B/C rows remain the host slot's, and the hosted piece inherits the host slot's Motion recipe, level FX send, lead-tame flag and board look. features.json records only bright/low/onsets/dyn for this piece - it does NOT record BPM or FORM; BPM/FORM below are from round2.py only. Missing: authored full-cycle duration (computed 30.0 s here); authored Motion/FX/look rows (host-inherited); B/C sound rows for the piece itself; a refined-generation script (see render_status).",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 87.593,
+      "mp3": "../renders/claude-r2-robot-lullaby.mp3",
+      "mp3_bytes": 3506696,
+      "mp3_sha256": "dc47c0b1aac4cc0c355e18655de7dad0a263691e6acc06d4685b9a828edb1a2f",
+      "wav_sha256": "ea8f2d94f2acf8252f8e50f913de34e91d762b39638a0473b61a6fa8edc0b9a4",
+      "group": 0,
+      "mode": "C",
+      "slot": 4,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 40
+      },
+      "dump_engines": {
+        "0": 0,
+        "1": 5,
+        "2": 5
+      },
+      "game_rng": "4a8ba378",
+      "rms": 6550.4,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 80 want 80 OK",
+        "  swing: got 50 want 50 OK",
+        "  root: got 53 want 53 OK",
+        "  scale: got 0 want 0 OK",
+        "  prog: got 0, 5, 3, 4 want 0, 5, 3, 4 OK",
+        "  prog_q: got ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_DOM7 want ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 0 want 0 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 24 want 24 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0101, 0x1010, 0x0000, 0x4444, 0x0000}, .bass = 0x0101, .chord = 0} want {.drum = {0x0101, 0x1010, 0x0000, 0x4444, 0x0000}, .bass = 0x0101, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|40 want 0,1,2,3|4|40 OK",
+        "  profile(group 0): got (0, 5, 5, 2, 2, 6, 8) want (0, 5, 5, 2, 2, 6, 8) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 12 sections: slots [0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 2, 3]",
+      "sections": [
+        [
+          0,
+          0,
+          0.0
+        ],
+        [
+          1,
+          0,
+          5.088
+        ],
+        [
+          2,
+          0,
+          12.608
+        ],
+        [
+          3,
+          0,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          1,
+          35.168
+        ],
+        [
+          6,
+          2,
+          42.672
+        ],
+        [
+          7,
+          0,
+          50.192
+        ],
+        [
+          8,
+          1,
+          57.712
+        ],
+        [
+          9,
+          0,
+          65.232
+        ],
+        [
+          10,
+          2,
+          72.752
+        ],
+        [
+          11,
+          3,
+          80.272
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 4 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r2, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/clips/robot-lullaby.mp3"
+        },
+        {
+          "label": "Claude refined played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/refined/robot-lullaby-refined.mp3"
+        }
+      ]
+    },
+    {
+      "id": "claude-r2-iron-lung",
+      "title": "Iron Lung",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 72,
+          "round": 2,
+          "author": "Claude",
+          "original_title": "Iron Lung",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/round2/round2.py",
+          "capability_class": "existing-capability",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 85 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (85 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection A6. Params only in round2.py: BPM 170, swing 50, root 40 (E minor, scale 1), progression Em7-Em(maj7)-Cmaj7-B7 (prog (0,0,5,4), min7/minmaj7/maj7/dom7), events_per_chord 4, rhythm 2 (half-time), cap 28, host slot 11 (Trap Lullaby), groove kick 0x0401 clap 0x0100 hat 0x5555 bass 0x0401. Group-A sounds (bass/lead/chords, eng/pre/kit): ANALOG/NOISE/ANALOG (0,11,0), presets (1,3,14), kit 33 INDUSTRIAL; README names: bass 808 DIRTY, lead NOISE NZ METAL, chords DARK STR. Capability hint in R2 README (applies to all 15 R2 pieces): 'EXISTING-CAPABILITY AUDITION as a slot replacement (data only)'; as an ADDED level it is 'RESEARCH-ONLY DATA EXTENSION (about 120 B per level, plus authored Motion/look rows and test churn)'; 'None needs new machinery.' Only the group-A profile row is replaced by compose.patch; B/C rows remain the host slot's, and the hosted piece inherits the host slot's Motion recipe, level FX send, lead-tame flag and board look. features.json records only bright/low/onsets/dyn for this piece - it does NOT record BPM or FORM; BPM/FORM below are from round2.py only. Missing: authored full-cycle duration (computed 30.0 s here); authored Motion/FX/look rows (host-inherited); B/C sound rows for the piece itself; a refined-generation script (see render_status). README overlap flag (spectral only): nearest Amen Break at distance 0.35, half-time industrial vs jungle.",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 95.096,
+      "mp3": "../renders/claude-r2-iron-lung.mp3",
+      "mp3_bytes": 3806582,
+      "mp3_sha256": "212a7f0cbc8b6fc419e8676c28de5a3cc60f82315e76427b4b58e07bb8a6c823",
+      "wav_sha256": "23dc9d33252b013e15cc41da0f99b0824e11a2bc84194f02cd8abdab7b71f820",
+      "group": 0,
+      "mode": "C",
+      "slot": 11,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 85
+      },
+      "dump_engines": {
+        "0": 0,
+        "1": 11,
+        "2": 0
+      },
+      "game_rng": "cb02bb65",
+      "rms": 5089.3,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 170 want 170 OK",
+        "  swing: got 50 want 50 OK",
+        "  root: got 40 want 40 OK",
+        "  scale: got 1 want 1 OK",
+        "  prog: got 0, 0, 5, 4 want 0, 0, 5, 4 OK",
+        "  prog_q: got ORO_Q_MIN7, ORO_Q_MINMAJ7, ORO_Q_MAJ7, ORO_Q_DOM7 want ORO_Q_MIN7, ORO_Q_MINMAJ7, ORO_Q_MAJ7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 2 want 2 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 28 want 28 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0401, 0x0000, 0x0100, 0x5555, 0x0000}, .bass = 0x0401, .chord = 0} want {.drum = {0x0401, 0x0000, 0x0100, 0x5555, 0x0000}, .bass = 0x0401, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|85 want 0,1,2,3|4|85 OK",
+        "  profile(group 0): got (0, 11, 0, 1, 3, 14, 33) want (0, 11, 0, 1, 3, 14, 33) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 13 sections: slots [1, 0, 1, 0, 2, 0, 0, 1, 1, 1, 2, 0, 3]",
+      "sections": [
+        [
+          0,
+          1,
+          0.0
+        ],
+        [
+          1,
+          0,
+          5.088
+        ],
+        [
+          2,
+          1,
+          12.608
+        ],
+        [
+          3,
+          0,
+          20.128
+        ],
+        [
+          4,
+          2,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          0,
+          42.672
+        ],
+        [
+          7,
+          1,
+          50.192
+        ],
+        [
+          8,
+          1,
+          57.712
+        ],
+        [
+          9,
+          1,
+          65.232
+        ],
+        [
+          10,
+          2,
+          72.752
+        ],
+        [
+          11,
+          0,
+          80.272
+        ],
+        [
+          12,
+          3,
+          87.776
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 11 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r2, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": {
+        "status": "BLOCKED",
+        "criterion": "per-second RMS agreement (median<=0.05dB, max<=0.5dB, no run>=3s over 0.1dB)",
+        "median_db": 0.18,
+        "max_db": 0.764,
+        "max_at_s": 38,
+        "n_over_0_1db": 70,
+        "max_run_over_0_1db": 8,
+        "n_sec": 95,
+        "shift_max": {
+          "-1": 1.556,
+          "0": 0.764,
+          "1": 1.641
+        },
+        "identity": "PASS (level name, BPM, engines, presets, kit all match host spec)",
+        "staging": "PASS (peak within 0.0005 dB of host)",
+        "note": "RMS disagreement is a different PERFORMANCE (different game evolution), not a different piece or broken DSP. See RENDER-LOG.md cross-check section for the elimination log."
+      },
+      "held": true,
+      "held_note": "Cross-check note (parent decision \u2014 this track IS delivered): the host render passes all artifact gates (config check, cycle coverage, engine DUMP). The WASM bench cross-check\u2019s performance-identity criterion was retired because the WASM bench plays a different performance of the same piece while entry identity, DSP staging, game clock and determinism all agree (full elimination log in renders/RENDER-LOG.md). The manifest\u2019s delivery_hold flag is superseded by this decision; the track is not hidden.",
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/clips/iron-lung.mp3"
+        },
+        {
+          "label": "Claude refined played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/refined/iron-lung-refined.mp3"
+        }
+      ]
+    },
+    {
+      "id": "claude-r2-talking-drums",
+      "title": "Talking Drums",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 76,
+          "round": 2,
+          "author": "Claude",
+          "original_title": "Talking Drums",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/round2/round2.py",
+          "capability_class": "existing-capability",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 52 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (52 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection B2. Params only in round2.py: BPM 104, swing 58, root 45 (A minor, scale 1), progression Am7-Dm7-Am7-E7 (prog (0,3,0,4), min7/min7/min7/dom7), events_per_chord 4, rhythm 1, cap 28, host slot 13 (Highlife Kalimba), groove kick 0x0441 hat 0x5555 bass 0x0441. Group-A sounds (bass/lead/chords, eng/pre/kit): PHYS/PHYS/FORMANT (10,10,5), presets (25,5,0), kit 26 AFRO; README names: bass PHYS TIMPANI, lead PHYS HAND DRUM, chords FORMANT CHOIR AAH. Capability hint in R2 README (applies to all 15 R2 pieces): 'EXISTING-CAPABILITY AUDITION as a slot replacement (data only)'; as an ADDED level it is 'RESEARCH-ONLY DATA EXTENSION (about 120 B per level, plus authored Motion/look rows and test churn)'; 'None needs new machinery.' Only the group-A profile row is replaced by compose.patch; B/C rows remain the host slot's, and the hosted piece inherits the host slot's Motion recipe, level FX send, lead-tame flag and board look. features.json records only bright/low/onsets/dyn for this piece - it does NOT record BPM or FORM; BPM/FORM below are from round2.py only. Missing: authored full-cycle duration (computed 30.0 s here); authored Motion/FX/look rows (host-inherited); B/C sound rows for the piece itself; a refined-generation script (see render_status). README lists Talking Drums first in its 'top three to audition first' (Claude suggestion, not a Britton verdict). README challenge note: Talking Drums is new territory, NOT a Highlife replacement (Highlife is a Britton keeper per R2 README).",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 102.599,
+      "mp3": "../renders/claude-r2-talking-drums.mp3",
+      "mp3_bytes": 4106468,
+      "mp3_sha256": "e92b2d2b6ab7b2b2ded3f70c1e53da80a94bc081ed560cf004d3aa886e8e0fb6",
+      "wav_sha256": "1957cf597f0bfda1665336385438114f04daa7c00de97b049a2a75124585ce29",
+      "group": 0,
+      "mode": "C",
+      "slot": 13,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 52
+      },
+      "dump_engines": {
+        "0": 10,
+        "1": 10,
+        "2": 5
+      },
+      "game_rng": "fbf8d5bd",
+      "rms": 7308.3,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 104 want 104 OK",
+        "  swing: got 58 want 58 OK",
+        "  root: got 45 want 45 OK",
+        "  scale: got 1 want 1 OK",
+        "  prog: got 0, 3, 0, 4 want 0, 3, 0, 4 OK",
+        "  prog_q: got ORO_Q_MIN7, ORO_Q_MIN7, ORO_Q_MIN7, ORO_Q_DOM7 want ORO_Q_MIN7, ORO_Q_MIN7, ORO_Q_MIN7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 1 want 1 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 28 want 28 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0441, 0x0000, 0x0000, 0x5555, 0x0000}, .bass = 0x0441, .chord = 0} want {.drum = {0x0441, 0x0000, 0x0000, 0x5555, 0x0000}, .bass = 0x0441, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|52 want 0,1,2,3|4|52 OK",
+        "  profile(group 0): got (10, 10, 5, 25, 5, 0, 26) want (10, 10, 5, 25, 5, 0, 26) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 14 sections: slots [0, 0, 1, 0, 0, 0, 2, 0, 0, 1, 2, 0, 1, 3]",
+      "sections": [
+        [
+          0,
+          0,
+          0.0
+        ],
+        [
+          1,
+          0,
+          5.088
+        ],
+        [
+          2,
+          1,
+          12.608
+        ],
+        [
+          3,
+          0,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          2,
+          42.672
+        ],
+        [
+          7,
+          0,
+          50.192
+        ],
+        [
+          8,
+          0,
+          57.712
+        ],
+        [
+          9,
+          1,
+          65.232
+        ],
+        [
+          10,
+          2,
+          72.752
+        ],
+        [
+          11,
+          0,
+          80.272
+        ],
+        [
+          12,
+          1,
+          87.776
+        ],
+        [
+          13,
+          3,
+          95.296
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 13 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r2, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/clips/talking-drums.mp3"
+        },
+        {
+          "label": "Claude refined played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/refined/talking-drums-refined.mp3"
+        }
+      ]
+    },
+    {
+      "id": "claude-r2-acid-rain",
+      "title": "Acid Rain",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 68,
+          "round": 2,
+          "author": "Claude",
+          "original_title": "Acid Rain",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/round2/round2.py",
+          "capability_class": "existing-capability",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 64 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (64 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection A2. Params only in round2.py: BPM 128, swing 50, root 45 (A minor, scale 1), progression Am7-Asus4-Fmaj7-G7 (prog (0,0,5,6), min7/sus4/maj7/dom7), events_per_chord 4, rhythm 3 (four-floor), cap 28, host slot 5 (Deep House), groove kick 0x1111 clap 0x1010 open-hat 0x4444 bass 0x6666 (16ths). Group-A sounds (bass/lead/chords, eng/pre/kit): ANALOG/PHASE/TRIO (0,2,6), presets (4,3,1), kit 7 (606); README names: bass ACID 303, lead PHASE RESO PLUCK, chords TRIO MIN STAB. Capability hint in R2 README (applies to all 15 R2 pieces): 'EXISTING-CAPABILITY AUDITION as a slot replacement (data only)'; as an ADDED level it is 'RESEARCH-ONLY DATA EXTENSION (about 120 B per level, plus authored Motion/look rows and test churn)'; 'None needs new machinery.' Only the group-A profile row is replaced by compose.patch; B/C rows remain the host slot's, and the hosted piece inherits the host slot's Motion recipe, level FX send, lead-tame flag and board look. features.json records only bright/low/onsets/dyn for this piece - it does NOT record BPM or FORM; BPM/FORM below are from round2.py only. Missing: authored full-cycle duration (computed 30.0 s here); authored Motion/FX/look rows (host-inherited); B/C sound rows for the piece itself; a refined-generation script (see render_status). README note: drum-snake HAT food adds FX locks driving the 'acid' build (repo + hypothesis).",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 155.103,
+      "mp3": "../renders/claude-r2-acid-rain.mp3",
+      "mp3_bytes": 6206713,
+      "mp3_sha256": "6f6f0985606cc4200fc5df7d04a58e3b81ad856aeace19b57842fc4b4fdbae90",
+      "wav_sha256": "14ed3ee0a21468b7017dd6f30d4158fe5b1c3d55ce55630f2c082d7aa3983966",
+      "group": 0,
+      "mode": "C",
+      "slot": 5,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 64
+      },
+      "dump_engines": {
+        "0": 0,
+        "1": 2,
+        "2": 6
+      },
+      "game_rng": "d3ab073c",
+      "rms": 4662.9,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 128 want 128 OK",
+        "  swing: got 50 want 50 OK",
+        "  root: got 45 want 45 OK",
+        "  scale: got 1 want 1 OK",
+        "  prog: got 0, 0, 5, 6 want 0, 0, 5, 6 OK",
+        "  prog_q: got ORO_Q_MIN7, ORO_Q_SUS4, ORO_Q_MAJ7, ORO_Q_DOM7 want ORO_Q_MIN7, ORO_Q_SUS4, ORO_Q_MAJ7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 3 want 3 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 28 want 28 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x1111, 0x0000, 0x1010, 0x0000, 0x4444}, .bass = 0x6666, .chord = 0} want {.drum = {0x1111, 0x0000, 0x1010, 0x0000, 0x4444}, .bass = 0x6666, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|64 want 0,1,2,3|4|64 OK",
+        "  profile(group 0): got (0, 2, 6, 4, 3, 1, 7) want (0, 2, 6, 4, 3, 1, 7) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 21 sections: slots [0, 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2, 2, 0, 1, 1, 0, 2, 1, 1, 3]",
+      "sections": [
+        [
+          0,
+          0,
+          0.0
+        ],
+        [
+          1,
+          0,
+          5.088
+        ],
+        [
+          2,
+          1,
+          12.608
+        ],
+        [
+          3,
+          2,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          1,
+          42.672
+        ],
+        [
+          7,
+          2,
+          50.192
+        ],
+        [
+          8,
+          0,
+          57.712
+        ],
+        [
+          9,
+          0,
+          65.232
+        ],
+        [
+          10,
+          1,
+          72.752
+        ],
+        [
+          11,
+          2,
+          80.272
+        ],
+        [
+          12,
+          2,
+          87.776
+        ],
+        [
+          13,
+          0,
+          95.296
+        ],
+        [
+          14,
+          1,
+          102.816
+        ],
+        [
+          15,
+          1,
+          110.336
+        ],
+        [
+          16,
+          0,
+          117.856
+        ],
+        [
+          17,
+          2,
+          125.36
+        ],
+        [
+          18,
+          1,
+          132.88
+        ],
+        [
+          19,
+          1,
+          140.4
+        ],
+        [
+          20,
+          3,
+          147.92
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 5 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r2, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/clips/acid-rain.mp3"
+        },
+        {
+          "label": "Claude refined played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/refined/acid-rain-refined.mp3"
+        }
+      ]
+    },
+    {
+      "id": "claude-r2-electro-glide",
+      "title": "Electro Glide",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 69,
+          "round": 2,
+          "author": "Claude",
+          "original_title": "Electro Glide",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/round2/round2.py",
+          "capability_class": "existing-capability",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 59 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (59 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection A3. Params only in round2.py: BPM 118, swing 50, root 43 (G minor, scale 1), progression Gm7-F7-Ebmaj7-D7 (prog (0,6,5,4), min7/dom7/maj7/dom7), events_per_chord 4, rhythm 2 (broken), cap 28, host slot 9 (Synthwave Drive), groove kick 0x0841 clap 0x1010 hat 0x5555 bass 0x0841. Group-A sounds (bass/lead/chords, eng/pre/kit): ANALOG/FORMANT/TRIO (0,5,6), presets (3,5,10), kit 19 ELECTRO; README names: bass 808 SLIDE, lead FORMANT ROBOT, chords TRIO 80S POLY. Capability hint in R2 README (applies to all 15 R2 pieces): 'EXISTING-CAPABILITY AUDITION as a slot replacement (data only)'; as an ADDED level it is 'RESEARCH-ONLY DATA EXTENSION (about 120 B per level, plus authored Motion/look rows and test churn)'; 'None needs new machinery.' Only the group-A profile row is replaced by compose.patch; B/C rows remain the host slot's, and the hosted piece inherits the host slot's Motion recipe, level FX send, lead-tame flag and board look. features.json records only bright/low/onsets/dyn for this piece - it does NOT record BPM or FORM; BPM/FORM below are from round2.py only. Missing: authored full-cycle duration (computed 30.0 s here); authored Motion/FX/look rows (host-inherited); B/C sound rows for the piece itself; a refined-generation script (see render_status). README overlap flag (spectral only, 'check by ear, not same piece'): nearest Dub Techno at distance 0.27.",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 57.597,
+      "mp3": "../renders/claude-r2-electro-glide.mp3",
+      "mp3_bytes": 2306108,
+      "mp3_sha256": "f4ba875015c76d5e0b7a1e9a2e7d9facee95b8d36989474d6da333acacd67d8c",
+      "wav_sha256": "123a932deb4a5042c5d21be91101e3718b67eff588ef06d3422f371034cb7987",
+      "group": 0,
+      "mode": "C",
+      "slot": 9,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 59
+      },
+      "dump_engines": {
+        "0": 0,
+        "1": 5,
+        "2": 6
+      },
+      "game_rng": "d2b3cd32",
+      "rms": 6739.4,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 118 want 118 OK",
+        "  swing: got 50 want 50 OK",
+        "  root: got 43 want 43 OK",
+        "  scale: got 1 want 1 OK",
+        "  prog: got 0, 6, 5, 4 want 0, 6, 5, 4 OK",
+        "  prog_q: got ORO_Q_MIN7, ORO_Q_DOM7, ORO_Q_MAJ7, ORO_Q_DOM7 want ORO_Q_MIN7, ORO_Q_DOM7, ORO_Q_MAJ7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 2 want 2 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 28 want 28 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0841, 0x0000, 0x1010, 0x5555, 0x0000}, .bass = 0x0841, .chord = 0} want {.drum = {0x0841, 0x0000, 0x1010, 0x5555, 0x0000}, .bass = 0x0841, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|59 want 0,1,2,3|4|59 OK",
+        "  profile(group 0): got (0, 5, 6, 3, 5, 10, 19) want (0, 5, 6, 3, 5, 10, 19) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 8 sections: slots [2, 2, 0, 0, 1, 1, 2, 3]",
+      "sections": [
+        [
+          0,
+          2,
+          0.0
+        ],
+        [
+          1,
+          2,
+          5.088
+        ],
+        [
+          2,
+          0,
+          12.608
+        ],
+        [
+          3,
+          0,
+          20.128
+        ],
+        [
+          4,
+          1,
+          27.648
+        ],
+        [
+          5,
+          1,
+          35.168
+        ],
+        [
+          6,
+          2,
+          42.672
+        ],
+        [
+          7,
+          3,
+          50.192
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 9 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r2, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/clips/electro-glide.mp3"
+        },
+        {
+          "label": "Claude refined played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/refined/electro-glide-refined.mp3"
+        }
+      ]
+    },
+    {
+      "id": "claude-r2-koto-garden",
+      "title": "Koto Garden",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 79,
+          "round": 2,
+          "author": "Claude",
+          "original_title": "Koto Garden",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/round2/round2.py",
+          "capability_class": "existing-capability",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 36 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (36 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection B5. Params only in round2.py: BPM 72, swing 50, root 52 (E minor, scale 1), progression Em7-Cmaj7-Am7-Bsus4 (prog (0,5,3,4), min7/maj7/min7/sus4), events_per_chord 4, rhythm 0, cap 24, host slot 14 (Clockwork Waltz), groove hat 0x0808 bass 0x0101. Group-A sounds (bass/lead/chords, eng/pre/kit): PHYS/PHYS/ANALOG (10,10,0), presets (12,13,21), kit 2 TIGHT; README names: bass PHYS PLUCK BASS, lead PHYS KOTO, chords SINE PAD. Capability hint in R2 README (applies to all 15 R2 pieces): 'EXISTING-CAPABILITY AUDITION as a slot replacement (data only)'; as an ADDED level it is 'RESEARCH-ONLY DATA EXTENSION (about 120 B per level, plus authored Motion/look rows and test churn)'; 'None needs new machinery.' Only the group-A profile row is replaced by compose.patch; B/C rows remain the host slot's, and the hosted piece inherits the host slot's Motion recipe, level FX send, lead-tame flag and board look. features.json records only bright/low/onsets/dyn for this piece - it does NOT record BPM or FORM; BPM/FORM below are from round2.py only. Missing: authored full-cycle duration (computed 30.0 s here); authored Motion/FX/look rows (host-inherited); B/C sound rows for the piece itself; a refined-generation script (see render_status).",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 125.092,
+      "mp3": "../renders/claude-r2-koto-garden.mp3",
+      "mp3_bytes": 5006125,
+      "mp3_sha256": "ce153e9caed74afb221f788428a2e2b7f16ce0ae71476941fc07fdcfccf915ea",
+      "wav_sha256": "1866bb6c95a43c4d6df7bea551642cd95ab074a7d73b7bffc6b594e514c954b4",
+      "group": 0,
+      "mode": "C",
+      "slot": 14,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 36
+      },
+      "dump_engines": {
+        "0": 10,
+        "1": 10,
+        "2": 0
+      },
+      "game_rng": "16193bf2",
+      "rms": 4373.7,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 72 want 72 OK",
+        "  swing: got 50 want 50 OK",
+        "  root: got 52 want 52 OK",
+        "  scale: got 1 want 1 OK",
+        "  prog: got 0, 5, 3, 4 want 0, 5, 3, 4 OK",
+        "  prog_q: got ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_SUS4 want ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_SUS4 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 0 want 0 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 24 want 24 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0000, 0x0000, 0x0000, 0x0808, 0x0000}, .bass = 0x0101, .chord = 0} want {.drum = {0x0000, 0x0000, 0x0000, 0x0808, 0x0000}, .bass = 0x0101, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|36 want 0,1,2,3|4|36 OK",
+        "  profile(group 0): got (10, 10, 0, 12, 13, 21, 2) want (10, 10, 0, 12, 13, 21, 2) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 17 sections: slots [0, 0, 1, 2, 0, 0, 1, 2, 2, 0, 1, 1, 0, 2, 1, 1, 3]",
+      "sections": [
+        [
+          0,
+          0,
+          0.0
+        ],
+        [
+          1,
+          0,
+          5.088
+        ],
+        [
+          2,
+          1,
+          12.608
+        ],
+        [
+          3,
+          2,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          1,
+          42.672
+        ],
+        [
+          7,
+          2,
+          50.192
+        ],
+        [
+          8,
+          2,
+          57.712
+        ],
+        [
+          9,
+          0,
+          65.232
+        ],
+        [
+          10,
+          1,
+          72.752
+        ],
+        [
+          11,
+          1,
+          80.272
+        ],
+        [
+          12,
+          0,
+          87.776
+        ],
+        [
+          13,
+          2,
+          95.296
+        ],
+        [
+          14,
+          1,
+          102.816
+        ],
+        [
+          15,
+          1,
+          110.336
+        ],
+        [
+          16,
+          3,
+          117.856
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 14 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r2, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/clips/koto-garden.mp3"
+        },
+        {
+          "label": "Claude refined played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/refined/koto-garden-refined.mp3"
+        }
+      ]
+    },
+    {
+      "id": "claude-r2-steel-pan-calypso",
+      "title": "Steel Pan Calypso",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 81,
+          "round": 2,
+          "author": "Claude",
+          "original_title": "Steel Pan Calypso",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/round2/round2.py",
+          "capability_class": "existing-capability",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 56 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (56 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection B7. Params only in round2.py: BPM 112, swing 60, root 48 (C major, scale 0), progression Cmaj7-Fmaj7-G7-Cmaj7 (prog (0,3,4,0), maj7/maj7/dom7/maj7), events_per_chord 4, rhythm 1, cap 28, host slot 8 (Bossa Nights), groove kick 0x0101 clap 0x0410 hat 0x5555 bass 0x0909 (calypso bass 1/4/9/12). Group-A sounds (bass/lead/chords, eng/pre/kit): DIGITAL/PHYS/DIGITAL (1,10,1), presets (18,21,8), kit 27 LATIN; README names: bass DIGITAL BASS GTR, lead PHYS STEEL PAN, chords DIGITAL MARIMBA. Capability hint in R2 README (applies to all 15 R2 pieces): 'EXISTING-CAPABILITY AUDITION as a slot replacement (data only)'; as an ADDED level it is 'RESEARCH-ONLY DATA EXTENSION (about 120 B per level, plus authored Motion/look rows and test churn)'; 'None needs new machinery.' Only the group-A profile row is replaced by compose.patch; B/C rows remain the host slot's, and the hosted piece inherits the host slot's Motion recipe, level FX send, lead-tame flag and board look. features.json records only bright/low/onsets/dyn for this piece - it does NOT record BPM or FORM; BPM/FORM below are from round2.py only. Missing: authored full-cycle duration (computed 30.0 s here); authored Motion/FX/look rows (host-inherited); B/C sound rows for the piece itself; a refined-generation script (see render_status). README overlap flag (spectral only): nearest Warehouse Glow at distance 0.34.",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 230.101,
+      "mp3": "../renders/claude-r2-steel-pan-calypso.mp3",
+      "mp3_bytes": 9206615,
+      "mp3_sha256": "0d0279fbffed2ec9a80f2d6da9ce14b362bc06f16bffadefd0f46ea3876a4f16",
+      "wav_sha256": "eec25ea13aa7ecd8b1466cd73bd84f464480f96cc051e9b42cd2e9d5a05c49cf",
+      "group": 0,
+      "mode": "C",
+      "slot": 8,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 56
+      },
+      "dump_engines": {
+        "0": 1,
+        "1": 10,
+        "2": 1
+      },
+      "game_rng": "d545a7bf",
+      "rms": 5301.1,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 112 want 112 OK",
+        "  swing: got 60 want 60 OK",
+        "  root: got 48 want 48 OK",
+        "  scale: got 0 want 0 OK",
+        "  prog: got 0, 3, 4, 0 want 0, 3, 4, 0 OK",
+        "  prog_q: got ORO_Q_MAJ7, ORO_Q_MAJ7, ORO_Q_DOM7, ORO_Q_MAJ7 want ORO_Q_MAJ7, ORO_Q_MAJ7, ORO_Q_DOM7, ORO_Q_MAJ7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 1 want 1 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 28 want 28 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0101, 0x0000, 0x0410, 0x5555, 0x0000}, .bass = 0x0909, .chord = 0} want {.drum = {0x0101, 0x0000, 0x0410, 0x5555, 0x0000}, .bass = 0x0909, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|56 want 0,1,2,3|4|56 OK",
+        "  profile(group 0): got (1, 10, 1, 18, 21, 8, 27) want (1, 10, 1, 18, 21, 8, 27) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 31 sections: slots [3, 2, 3, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 1, 0, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 0, 3]",
+      "sections": [
+        [
+          0,
+          3,
+          0.0
+        ],
+        [
+          1,
+          2,
+          5.088
+        ],
+        [
+          2,
+          3,
+          12.608
+        ],
+        [
+          3,
+          0,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          0,
+          42.672
+        ],
+        [
+          7,
+          0,
+          50.192
+        ],
+        [
+          8,
+          0,
+          57.712
+        ],
+        [
+          9,
+          1,
+          65.232
+        ],
+        [
+          10,
+          0,
+          72.752
+        ],
+        [
+          11,
+          1,
+          80.272
+        ],
+        [
+          12,
+          0,
+          87.776
+        ],
+        [
+          13,
+          2,
+          95.296
+        ],
+        [
+          14,
+          0,
+          102.816
+        ],
+        [
+          15,
+          1,
+          110.336
+        ],
+        [
+          16,
+          0,
+          117.856
+        ],
+        [
+          17,
+          1,
+          125.36
+        ],
+        [
+          18,
+          1,
+          132.88
+        ],
+        [
+          19,
+          2,
+          140.4
+        ],
+        [
+          20,
+          1,
+          147.92
+        ],
+        [
+          21,
+          2,
+          155.44
+        ],
+        [
+          22,
+          1,
+          162.96
+        ],
+        [
+          23,
+          2,
+          170.464
+        ],
+        [
+          24,
+          1,
+          177.984
+        ],
+        [
+          25,
+          1,
+          185.504
+        ],
+        [
+          26,
+          1,
+          193.024
+        ],
+        [
+          27,
+          1,
+          200.544
+        ],
+        [
+          28,
+          2,
+          208.048
+        ],
+        [
+          29,
+          0,
+          215.568
+        ],
+        [
+          30,
+          3,
+          223.088
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 8 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r2, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/clips/steel-pan-calypso.mp3"
+        },
+        {
+          "label": "Claude refined played session (R2)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/round2/refined/steel-pan-calypso-refined.mp3"
+        }
+      ]
+    },
+    {
+      "id": "claude-r1-lowrider-sunset",
+      "title": "Lowrider Sunset",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 59,
+          "round": 1,
+          "author": "Claude",
+          "original_title": "Lowrider Sunset",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/compose.py",
+          "capability_class": "data-only-extension",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 44 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (44 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "New level data, hosted in slot 4 (Boom Bap slot) for the clip; slot's Motion recipe stays the host's. Params only in compose.py: BPM 88, swing 62, root 43 (G minor, scale 1 natural minor), progression Gm7-C7-Ebmaj7-D7 (prog (0,3,5,4), min7/dom7/maj7/dom7), events_per_chord 4, rhythm 1, cap 28, groove drum {0x0121,0x1010,0,0x5555,0} bass 0x0121. Group-A sounds (bass/lead/chords, eng/pre/kit): ANALOG/ANALOG/DIGITAL (0,0,1), presets (8,9,0), kit 5 (808); README names: bass ANALOG FUNK BASS, lead ANALOG G-FUNK LD, chords DIGITAL RHODES. Capability hint: 'VERY LOW, data only', hosted in Boom Bap slot. B/C groups only proposed in prose (B: FORMANT TALKBOX lead / DRAWBAR SOUL ORGAN / ANALOG 808 SLIDE; C: PWM LEAD / WURLI / SAMPLE DEEP BASS) - no B/C renders in this branch. Missing: authored full-cycle duration (computed 30.0 s); authored Motion recipe (host-inherited); B/C renders. No same-title duplicate inside this lane.",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 1,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 87.593,
+      "mp3": "../renders/claude-r1-lowrider-sunset.mp3",
+      "mp3_bytes": 3506696,
+      "mp3_sha256": "fbade5db0f34d5004a9556d70c8c2f6555246f9fbb7860d422d1cc9b47b852da",
+      "wav_sha256": "0f8b129b364dfca384eb815a66ef2940abe30c568768ee833c6b86ea7c6549c3",
+      "group": 0,
+      "mode": "C",
+      "slot": 4,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 44
+      },
+      "dump_engines": {
+        "0": 0,
+        "1": 0,
+        "2": 1
+      },
+      "game_rng": "40e6f8ad",
+      "rms": 6157.9,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 88 want 88 OK",
+        "  swing: got 62 want 62 OK",
+        "  root: got 43 want 43 OK",
+        "  scale: got 1 want 1 OK",
+        "  prog: got 0, 3, 5, 4 want 0, 3, 5, 4 OK",
+        "  prog_q: got ORO_Q_MIN7, ORO_Q_DOM7, ORO_Q_MAJ7, ORO_Q_DOM7 want ORO_Q_MIN7, ORO_Q_DOM7, ORO_Q_MAJ7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 1 want 1 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 28 want 28 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0121, 0x1010, 0x0000, 0x5555, 0x0000}, .bass = 0x0121, .chord = 0} want {.drum = {0x0121, 0x1010, 0x0000, 0x5555, 0x0000}, .bass = 0x0121, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|44 want 0,1,2,3|4|44 OK",
+        "  profile(group 0): got (0, 0, 1, 8, 9, 0, 5) want (0, 0, 1, 8, 9, 0, 5) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 12 sections: slots [0, 0, 0, 0, 0, 1, 2, 0, 1, 0, 2, 3]",
+      "sections": [
+        [
+          0,
+          0,
+          0.0
+        ],
+        [
+          1,
+          0,
+          5.088
+        ],
+        [
+          2,
+          0,
+          12.608
+        ],
+        [
+          3,
+          0,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          1,
+          35.168
+        ],
+        [
+          6,
+          2,
+          42.672
+        ],
+        [
+          7,
+          0,
+          50.192
+        ],
+        [
+          8,
+          1,
+          57.712
+        ],
+        [
+          9,
+          0,
+          65.232
+        ],
+        [
+          10,
+          2,
+          72.752
+        ],
+        [
+          11,
+          3,
+          80.272
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 4 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r1, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R1)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/clips/lowrider-sunset.mp3"
+        }
+      ]
+    },
+    {
+      "id": "muse-r1-night-drive-warm",
+      "title": "Night Drive (Warm)",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 32,
+          "round": 1,
+          "author": "Muse",
+          "original_title": "Night Drive (Warm)",
+          "source_branch": "research/composition-lab-proposals-muse",
+          "source_sha": "5f7ae01fe44b0b02e1182420c691a4b17771013c",
+          "source_path": "PROPOSALS-MUSE.md",
+          "capability_class": "data-only-extension",
+          "form_evolution": "4-state 96-pool FORM journey over progression i-iv-VI-VII (MIN7, MIN7, MAJ7, DOM7), Eb natural minor in order; 1 section per state, section_ticks=44 (7.5 s per section at 88 BPM); doc does not explicitly define a cycle-end event beyond traversal of all 4 states.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "New level row, data only; 88 BPM, swing 58, root Eb (51), cap 24; bass ANALOG warm, lead FORMANT, chord TRIO, kit HOUSE. Possible_duplicate_of (author-named nearest existing levels, kept distinct): Deep House (same progression family, 122 BPM straight) and Synthwave Drive (100 BPM driving) \u2014 differs on tempo, swing, warmth, and cap. Missing: preset_indices (deliberately not asserted), cycle_end_definition (not explicitly defined), full Group B/C cell specs beyond cooler digital variants. Render note: no prior render identified; future audition experiment only proposed, not performed.",
+          "prior_judgment_note": "Author diversity test (conditional, not a verdict): most overlap-adjacent of the ten; drop Night Drive first if the audition finds it too close to Deep House."
+        }
+      ],
+      "round": 1,
+      "author": "Muse",
+      "joint_lane": false,
+      "duration_s": 155.103,
+      "mp3": "../renders/muse-r1-night-drive-warm.mp3",
+      "mp3_bytes": 6206713,
+      "mp3_sha256": "80f69e2e65d68f459b055f7f909111c795287db285f6dee5b2cdf3c4a4f357e6",
+      "wav_sha256": "53fcc27df72da76e0dc6cbff050222778e985b247e7cfbf28cf9fea595cebd17",
+      "group": 0,
+      "mode": "C",
+      "slot": 5,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 44
+      },
+      "dump_engines": {
+        "0": 0,
+        "1": 5,
+        "2": 6
+      },
+      "game_rng": "e056a300",
+      "rms": 6319.4,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 88 want 88 OK",
+        "  swing: got 58 want 58 OK",
+        "  root: got 51 want 51 OK",
+        "  scale: got 1 want 1 OK",
+        "  prog: got 0, 3, 5, 6 want 0, 3, 5, 6 OK",
+        "  prog_q: got ORO_Q_MIN7, ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_DOM7 want ORO_Q_MIN7, ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 0 want 0 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 24 want 24 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x1111, 0x0000, 0x0000, 0x4444, 0x0000}, .bass = 0x0001, .chord = 0} want {.drum = {0x1111, 0x0000, 0x0000, 0x4444, 0x0000}, .bass = 0x0001, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|44 want 0,1,2,3|4|44 OK",
+        "  profile(group 0): got (0, 5, 6, 2, 1, 4, 15) want (0, 5, 6, 2, 1, 4, 15) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 21 sections: slots [0, 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2, 2, 0, 1, 1, 0, 2, 1, 1, 3]",
+      "sections": [
+        [
+          0,
+          0,
+          0.0
+        ],
+        [
+          1,
+          0,
+          5.088
+        ],
+        [
+          2,
+          1,
+          12.608
+        ],
+        [
+          3,
+          2,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          1,
+          42.672
+        ],
+        [
+          7,
+          2,
+          50.192
+        ],
+        [
+          8,
+          0,
+          57.712
+        ],
+        [
+          9,
+          0,
+          65.232
+        ],
+        [
+          10,
+          1,
+          72.752
+        ],
+        [
+          11,
+          2,
+          80.272
+        ],
+        [
+          12,
+          2,
+          87.776
+        ],
+        [
+          13,
+          0,
+          95.296
+        ],
+        [
+          14,
+          1,
+          102.816
+        ],
+        [
+          15,
+          1,
+          110.336
+        ],
+        [
+          16,
+          0,
+          117.856
+        ],
+        [
+          17,
+          2,
+          125.36
+        ],
+        [
+          18,
+          1,
+          132.88
+        ],
+        [
+          19,
+          1,
+          140.4
+        ],
+        [
+          20,
+          3,
+          147.92
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 5 (Deep House, author-named nearest existing level) is a HOST choice, not authored: its Motion recipe / look / food FX / lead-tame stay the slot's (recorded per render).",
+        "B/C described variants (warmer/cooler/darker/brighter) NOT rendered; canonical = group A only.",
+        "FEEL / speed / OCT mentions in the doc are conditional player tools ('when wanted', 'for airiness', 'on request') and are NOT scripted; canonical = row defaults (OCT 0, FEEL normal, speed 1x).",
+        "Groove: four-floor kick every beat (0x1111), offbeat closed hats (0x4444), no open-hat wash; bass default 0x0001."
+      ],
+      "choices": [
+        {
+          "param": "preset_bass",
+          "value": [
+            0,
+            2
+          ],
+          "kind": "audition_choice",
+          "reason": "ANALOG warm: role-canonical ANALOG bass (pre 2 SUB BASS).",
+          "open_item": "not ear-verified by renderer",
+          "ear_alternatives": []
+        },
+        {
+          "param": "preset_lead",
+          "value": [
+            5,
+            1
+          ],
+          "kind": "audition_choice",
+          "reason": "FORMANT vocal-ish: only FORMANT lead in-tree (VOICE SOUL OOH).",
+          "open_item": "not ear-verified by renderer",
+          "ear_alternatives": []
+        },
+        {
+          "param": "preset_chord",
+          "value": [
+            6,
+            4
+          ],
+          "kind": "audition_choice",
+          "reason": "TRIO chord bed: only TRIO chord in frozen group-A rows (DUB CHORD).",
+          "open_item": "not ear-verified by renderer",
+          "ear_alternatives": []
+        }
+      ],
+      "provenance_source": "PROPOSALS-MUSE.md (Muse R1, research/composition-lab-proposals-muse)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": []
+    },
+    {
+      "id": "muse-r1-desert-hymn",
+      "title": "Desert Hymn",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 36,
+          "round": 1,
+          "author": "Muse",
+          "original_title": "Desert Hymn",
+          "source_branch": "research/composition-lab-proposals-muse",
+          "source_sha": "5f7ae01fe44b0b02e1182420c691a4b17771013c",
+          "source_path": "PROPOSALS-MUSE.md",
+          "capability_class": "data-only-extension",
+          "form_evolution": "4-state 96-pool FORM journey over progression I-IV-vi-V (MAJ7, MAJ7, MIN7, DOM7), G major in order; 1 section per state, section_ticks=38 (7.5 s per section at 76 BPM); doc does not explicitly define a cycle-end event beyond traversal of all 4 states.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "New level row, data only; 76 BPM, straight (50), root G (43), cap 22, chord-only (no drums); bass SAMPLE warm, lead FORMANT choir-like, chord DRAWBAR, kit ACOUSTIC (unused). Author top-3 preference (audition first, not a verdict): Muse Round-1 top 3 #3 (FORMANT choir timbre frontier). Possible_duplicate_of (author-named nearest neighbors, kept distinct): Sunrise Over Still Water (see prior_judgment_note) and Bossa Nights' FORMANT lead preset inside a bossa groove (different world); doc states no choir-led level exists. Missing: preset_indices (deliberately not asserted; FORMANT preset semantics UNKNOWN \u2014 doc calls this the single biggest timbre risk in the collection), cycle_end_definition (not explicitly defined), full Group B/C cell specs beyond closer/darker choir variants. Render note: no prior render identified; future audition experiment only proposed, not performed.",
+          "prior_judgment_note": "Author diversity test (conditional, not a verdict): merge candidate with Sunrise Over Still Water if Britton hears them as one; merge would keep Desert's choir lead + Sunrise's heartbeat."
+        }
+      ],
+      "round": 1,
+      "author": "Muse",
+      "joint_lane": false,
+      "duration_s": 230.101,
+      "mp3": "../renders/muse-r1-desert-hymn.mp3",
+      "mp3_bytes": 9206615,
+      "mp3_sha256": "9e0ad360e65b9f3b1dd736e3f9030a814e67930e74cb125502d8e1d9ca743a0f",
+      "wav_sha256": "f70fba54621308cd3d74a44345c53b8ac09242c7ae8e07e4f99faeea479f393f",
+      "group": 0,
+      "mode": "C",
+      "slot": 8,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 38
+      },
+      "dump_engines": {
+        "0": 4,
+        "1": 5,
+        "2": 7
+      },
+      "game_rng": "fed1ee62",
+      "rms": 7083.4,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 76 want 76 OK",
+        "  swing: got 50 want 50 OK",
+        "  root: got 43 want 43 OK",
+        "  scale: got 0 want 0 OK",
+        "  prog: got 0, 3, 5, 4 want 0, 3, 5, 4 OK",
+        "  prog_q: got ORO_Q_MAJ7, ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_DOM7 want ORO_Q_MAJ7, ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 0 want 0 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 22 want 22 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000}, .bass = 0x0000, .chord = 1} want {.drum = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000}, .bass = 0x0000, .chord = 1} OK",
+        "  form: got 0,1,2,3|4|38 want 0,1,2,3|4|38 OK",
+        "  profile(group 0): got (4, 5, 7, 1, 1, 0, 0) want (4, 5, 7, 1, 1, 0, 0) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 31 sections: slots [3, 2, 3, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 1, 0, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 0, 3]",
+      "sections": [
+        [
+          0,
+          3,
+          0.0
+        ],
+        [
+          1,
+          2,
+          5.088
+        ],
+        [
+          2,
+          3,
+          12.608
+        ],
+        [
+          3,
+          0,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          0,
+          42.672
+        ],
+        [
+          7,
+          0,
+          50.192
+        ],
+        [
+          8,
+          0,
+          57.712
+        ],
+        [
+          9,
+          1,
+          65.232
+        ],
+        [
+          10,
+          0,
+          72.752
+        ],
+        [
+          11,
+          1,
+          80.272
+        ],
+        [
+          12,
+          0,
+          87.776
+        ],
+        [
+          13,
+          2,
+          95.296
+        ],
+        [
+          14,
+          0,
+          102.816
+        ],
+        [
+          15,
+          1,
+          110.336
+        ],
+        [
+          16,
+          0,
+          117.856
+        ],
+        [
+          17,
+          1,
+          125.36
+        ],
+        [
+          18,
+          1,
+          132.88
+        ],
+        [
+          19,
+          2,
+          140.4
+        ],
+        [
+          20,
+          1,
+          147.92
+        ],
+        [
+          21,
+          2,
+          155.44
+        ],
+        [
+          22,
+          1,
+          162.96
+        ],
+        [
+          23,
+          2,
+          170.464
+        ],
+        [
+          24,
+          1,
+          177.984
+        ],
+        [
+          25,
+          1,
+          185.504
+        ],
+        [
+          26,
+          1,
+          193.024
+        ],
+        [
+          27,
+          1,
+          200.544
+        ],
+        [
+          28,
+          2,
+          208.048
+        ],
+        [
+          29,
+          0,
+          215.568
+        ],
+        [
+          30,
+          3,
+          223.088
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 8 (Bossa Nights, author-named nearest existing level) is a HOST choice, not authored: its Motion recipe / look / food FX / lead-tame stay the slot's (recorded per render).",
+        "B/C described variants (warmer/cooler/darker/brighter) NOT rendered; canonical = group A only.",
+        "FEEL / speed / OCT mentions in the doc are conditional player tools ('when wanted', 'for airiness', 'on request') and are NOT scripted; canonical = row defaults (OCT 0, FEEL normal, speed 1x).",
+        "Groove: chord-only (no drums), kit present but unused (same as Musicbox/Orbit)."
+      ],
+      "choices": [
+        {
+          "param": "preset_bass",
+          "value": [
+            4,
+            1
+          ],
+          "kind": "audition_choice",
+          "reason": "SAMPLE warm: SAMPLE bass tie -> lowest (UP BASS).",
+          "open_item": "not ear-verified by renderer",
+          "ear_alternatives": [
+            "SAMPLE DEEP BASS pre 10"
+          ]
+        },
+        {
+          "param": "preset_lead",
+          "value": [
+            5,
+            1
+          ],
+          "kind": "audition_choice",
+          "reason": "FORMANT choir-like: only FORMANT lead in-tree (VOICE SOUL OOH).",
+          "open_item": "not ear-verified by renderer",
+          "ear_alternatives": []
+        },
+        {
+          "param": "preset_chord",
+          "value": [
+            7,
+            0
+          ],
+          "kind": "audition_choice",
+          "reason": "DRAWBAR: DRAWBAR chord tie -> lowest (SOUL ORGAN).",
+          "open_item": "not ear-verified by renderer",
+          "ear_alternatives": []
+        }
+      ],
+      "provenance_source": "PROPOSALS-MUSE.md (Muse R1, research/composition-lab-proposals-muse)",
+      "status": "DELIVERED",
+      "cross_check": null,
+      "held": false,
+      "held_note": null,
+      "played_sessions": []
+    },
+    {
+      "id": "claude-r1-velvet-cathedral",
+      "title": "Velvet Cathedral",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 60,
+          "round": 1,
+          "author": "Claude",
+          "original_title": "Velvet Cathedral",
+          "source_branch": "origin/research/composition-lab-claude",
+          "source_sha": "06133c8a24f9cbed84b2b622a5f99701f93ca3de",
+          "source_path": "docs/research/composition-lab/compose.py",
+          "capability_class": "data-only-extension",
+          "form_evolution": "FORM recipe chord slots (0, 1, 2, 3) in order, 4 states, 33 ticks per section; one complete cycle per the prescribed formula = all 4 slots once, ending when the 4th section ends (33 ticks x 4). Firmware caveat (not a second cycle definition): the recipe's chord_slot order maps bank states to progression slots and the actual bank entry (corpus) length varies, so a live FORM bank traversal is not fixed to 4 sections.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "New level data, hosted in slot 8 (Bossa slot) for the clip; slot's Motion recipe stays the host's. Params only in compose.py: BPM 66, swing 66 (12/8 feel per README), root 51 (Eb major, scale 0), progression Ebmaj7-Cm7-Fm7-Bb7 (prog (0,5,1,4), maj7/min7/min7/dom7), events_per_chord 4, rhythm 1, cap 24, groove drum {0x0101,0,0x1010,0x2222,0} bass 0x0101. Group-A sounds (bass/lead/chords, eng/pre/kit): SAMPLE/FORMANT/DRAWBAR (4,5,7), presets (1,0,1), kit 36 JAZZ; README names: bass SAMPLE UP BASS, lead FORMANT CHOIR AAH, chords DRAWBAR GOSPEL. Capability hint: 'VERY LOW, data only', hosted in Bossa slot. B/C groups: addendum table gives B chords GRAND PNO / lead SOUL OOH / bass SUB BASS / DUST and C chords DRAWBAR CHAPEL / lead PAN FLUTE / bass PHYS CELLO BOW / DEEP, differing in ordering/detail from the earlier prose B/C proposal - the addendum table is the render-variant record, but no script/log pins which row was rendered. Missing: authored full-cycle duration (computed 30.0 s); authored Motion recipe (host-inherited); B/C group script/log. No same-title duplicate inside this lane.",
+          "prior_judgment_note": "Lane doc (R1 README addendum, citing #31 6393402411) records Britton: Velvet Cathedral keep."
+        }
+      ],
+      "round": 1,
+      "author": "Claude",
+      "joint_lane": false,
+      "duration_s": 230.101,
+      "mp3": "../renders/claude-r1-velvet-cathedral.mp3",
+      "mp3_bytes": 9206615,
+      "mp3_sha256": "1770332cc1a24feed5dcde5a64a2b3558b23c750a49449dd97a80a08b2931150",
+      "wav_sha256": "16a909c7a0eefc197e7a24e8507847bede0b941c4d011c966be72994830ea3fc",
+      "group": 0,
+      "mode": "C",
+      "slot": 8,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 33
+      },
+      "dump_engines": {
+        "0": 4,
+        "1": 5,
+        "2": 7
+      },
+      "game_rng": "beb44869",
+      "rms": 6749.5,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 66 want 66 OK",
+        "  swing: got 66 want 66 OK",
+        "  root: got 51 want 51 OK",
+        "  scale: got 0 want 0 OK",
+        "  prog: got 0, 5, 1, 4 want 0, 5, 1, 4 OK",
+        "  prog_q: got ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_MIN7, ORO_Q_DOM7 want ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_MIN7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 1 want 1 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 24 want 24 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0101, 0x0000, 0x1010, 0x2222, 0x0000}, .bass = 0x0101, .chord = 0} want {.drum = {0x0101, 0x0000, 0x1010, 0x2222, 0x0000}, .bass = 0x0101, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|33 want 0,1,2,3|4|33 OK",
+        "  profile(group 0): got (4, 5, 7, 1, 0, 1, 36) want (4, 5, 7, 1, 0, 1, 36) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 31 sections: slots [3, 2, 3, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 2, 0, 1, 0, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 0, 3]",
+      "sections": [
+        [
+          0,
+          3,
+          0.0
+        ],
+        [
+          1,
+          2,
+          5.088
+        ],
+        [
+          2,
+          3,
+          12.608
+        ],
+        [
+          3,
+          0,
+          20.128
+        ],
+        [
+          4,
+          0,
+          27.648
+        ],
+        [
+          5,
+          0,
+          35.168
+        ],
+        [
+          6,
+          0,
+          42.672
+        ],
+        [
+          7,
+          0,
+          50.192
+        ],
+        [
+          8,
+          0,
+          57.712
+        ],
+        [
+          9,
+          1,
+          65.232
+        ],
+        [
+          10,
+          0,
+          72.752
+        ],
+        [
+          11,
+          1,
+          80.272
+        ],
+        [
+          12,
+          0,
+          87.776
+        ],
+        [
+          13,
+          2,
+          95.296
+        ],
+        [
+          14,
+          0,
+          102.816
+        ],
+        [
+          15,
+          1,
+          110.336
+        ],
+        [
+          16,
+          0,
+          117.856
+        ],
+        [
+          17,
+          1,
+          125.36
+        ],
+        [
+          18,
+          1,
+          132.88
+        ],
+        [
+          19,
+          2,
+          140.4
+        ],
+        [
+          20,
+          1,
+          147.92
+        ],
+        [
+          21,
+          2,
+          155.44
+        ],
+        [
+          22,
+          1,
+          162.96
+        ],
+        [
+          23,
+          2,
+          170.464
+        ],
+        [
+          24,
+          1,
+          177.984
+        ],
+        [
+          25,
+          1,
+          185.504
+        ],
+        [
+          26,
+          1,
+          193.024
+        ],
+        [
+          27,
+          1,
+          200.544
+        ],
+        [
+          28,
+          2,
+          208.048
+        ],
+        [
+          29,
+          0,
+          215.568
+        ],
+        [
+          30,
+          3,
+          223.088
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Carrier slot 8 Motion recipe / look / food FX / lead-tame inherited from stock level (host artifact, not authored)."
+      ],
+      "choices": [],
+      "provenance_source": "compose.py PIECES verbatim (Claude r1, wt-claude)",
+      "status": "DELIVERED",
+      "cross_check": {
+        "status": "BLOCKED",
+        "criterion": "per-second RMS agreement (median<=0.05dB, max<=0.5dB, no run>=3s over 0.1dB)",
+        "median_db": 0.469,
+        "max_db": 2.425,
+        "max_at_s": 45,
+        "n_over_0_1db": 209,
+        "max_run_over_0_1db": 38,
+        "n_sec": 230,
+        "shift_max": {
+          "-1": 5.352,
+          "0": 2.425,
+          "1": 5.075
+        },
+        "identity": "PASS (level name, BPM, engines, presets, kit all match host spec)",
+        "staging": "PASS (peak within 0.0005 dB of host)",
+        "note": "RMS disagreement is a different PERFORMANCE (different game evolution), not a different piece or broken DSP. See RENDER-LOG.md cross-check section for the elimination log."
+      },
+      "held": true,
+      "held_note": "Cross-check note (parent decision \u2014 this track IS delivered): the host render passes all artifact gates (config check, cycle coverage, engine DUMP). The WASM bench cross-check\u2019s performance-identity criterion was retired because the WASM bench plays a different performance of the same piece while entry identity, DSP staging, game clock and determinism all agree (full elimination log in renders/RENDER-LOG.md). The manifest\u2019s delivery_hold flag is superseded by this decision; the track is not hidden.",
+      "played_sessions": [
+        {
+          "label": "Claude original 3-min played session (R1)",
+          "url": "https://github.com/Ignignot/oroboros-temp/blob/research/composition-lab-claude/docs/research/composition-lab/clips/velvet-cathedral.mp3"
+        }
+      ]
+    },
+    {
+      "id": "muse-r2-open-cloud-the-grain-voicing-piece",
+      "title": "Open Cloud (the GRAIN-voicing piece)",
+      "kind": "data_row",
+      "rows": [
+        {
+          "row_index": 50,
+          "round": 2,
+          "author": "Muse",
+          "original_title": "Open Cloud (the GRAIN-voicing piece)",
+          "source_branch": "research/composition-lab-round2-muse",
+          "source_sha": "1c9e5da9c1f41744f0811b620fc1aca4d59844f9",
+          "source_path": "docs/research/fouroboros-composition-lab-round2-muse.md",
+          "capability_class": "data-only-extension",
+          "form_evolution": "4-state 96-pool FORM journey over progression I-vi-IV-V (MAJ7, MIN7, MAJ7, DOM7), G major in order; 1 section per state, section_ticks=40 (7.5 s per section at 80 BPM); doc does not explicitly define a cycle-end event beyond traversal of all 4 states.",
+          "expected_duration": {
+            "seconds": 30.0,
+            "kind": "computed"
+          },
+          "notes": "Collection B2; RESEARCH-ONLY DATA EXTENSION; LOW cost; 80 BPM, swing 50, root G (43), cap 24; bass ANALOG SUB, lead PHYS GLASS BOWL, chord GRAIN SHIMMER (GRAIN id 8, 3 voices/part, so a 4-note chord sounds at most 3; 2nd-lowest note never sounds = open voicing by design), kit AMBIENT (35) sparsely used; Group B chord non-GRAIN for 3-voice vs 4-voice comparison. Author top-3 preference (audition first, not a verdict): Muse Round-2 top 3 #3 (purest machine-strength idea). Possible_duplicate_of (author-named nearest neighbors, kept distinct): Orbit Drift (GRAIN incidentally \u2014 differs 4-chord journey vs 2-chord drift, 80 vs 60 BPM, root/palette/cap), Round-1 Frozen Lake (slow chord clouds \u2014 differs GRAIN voicing vs PHASE cold), and Round-2 Open House (both Orbit-adjacent clouds \u2014 differs GRAIN voicing vs SEEDED guest, 96 journey vs 25 drift) and Swell (slow pad-led \u2014 differs mechanism). Considered-and-NOT-challenged vs Orbit (different purpose). Missing: preset_indices (deliberately not asserted), cycle_end_definition (not explicitly defined), full Group B/C cell specs beyond clearer/darker cloud variants. Render note: no render script/page identified.",
+          "prior_judgment_note": null
+        }
+      ],
+      "round": 2,
+      "author": "Muse",
+      "joint_lane": false,
+      "duration_s": 132.595,
+      "mp3": "../renders/muse-r2-open-cloud-the-grain-voicing-piece.mp3",
+      "mp3_bytes": 5306011,
+      "mp3_sha256": "0c657e900b8fc4e773aaf5d88dacfdbce4101d316585c4471a8dbaad0f117746",
+      "wav_sha256": "775233c1bb36cd8eecc12350f8ce1fe76fddc553c2139a0712fc873d9a365c3f",
+      "group": 0,
+      "mode": "C",
+      "slot": 12,
+      "form": {
+        "order": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "count": 4,
+        "ticks": 40,
+        "source": "authored"
+      },
+      "dump_engines": {
+        "0": 0,
+        "1": 10,
+        "2": 8
+      },
+      "game_rng": "0103f69d",
+      "rms": 6885.0,
+      "config_status": "PASS",
+      "config_checks": 14,
+      "config_lines": [
+        "  bpm: got 80 want 80 OK",
+        "  swing: got 50 want 50 OK",
+        "  root: got 43 want 43 OK",
+        "  scale: got 0 want 0 OK",
+        "  prog: got 0, 5, 3, 4 want 0, 5, 3, 4 OK",
+        "  prog_q: got ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_DOM7 want ORO_Q_MAJ7, ORO_Q_MIN7, ORO_Q_MAJ7, ORO_Q_DOM7 OK",
+        "  epc: got 4 want 4 OK",
+        "  rhythm: got 0 want 0 OK",
+        "  chaos: got 0 want 0 OK",
+        "  cap: got 24 want 24 OK",
+        "  speed: got 100 want 100 OK",
+        "  groove: got {.drum = {0x0001, 0x0000, 0x0000, 0x4444, 0x0000}, .bass = 0x0001, .chord = 0} want {.drum = {0x0001, 0x0000, 0x0000, 0x4444, 0x0000}, .bass = 0x0001, .chord = 0} OK",
+        "  form: got 0,1,2,3|4|40 want 0,1,2,3|4|40 OK",
+        "  profile(group 0): got (0, 10, 8, 2, 20, 4, 35) want (0, 10, 8, 2, 20, 4, 35) OK"
+      ],
+      "verification_label": "Patch read-back: 14 checks PASS",
+      "coverage_status": "PASS",
+      "coverage_detail": "targets [0, 1, 2, 3] covered in 18 sections: slots [1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 0, 0, 0, 1, 0, 2, 1, 3]",
+      "sections": [
+        [
+          0,
+          1,
+          0.0
+        ],
+        [
+          1,
+          2,
+          5.088
+        ],
+        [
+          2,
+          1,
+          12.608
+        ],
+        [
+          3,
+          1,
+          20.128
+        ],
+        [
+          4,
+          1,
+          27.648
+        ],
+        [
+          5,
+          2,
+          35.168
+        ],
+        [
+          6,
+          1,
+          42.672
+        ],
+        [
+          7,
+          1,
+          50.192
+        ],
+        [
+          8,
+          2,
+          57.712
+        ],
+        [
+          9,
+          1,
+          65.232
+        ],
+        [
+          10,
+          0,
+          72.752
+        ],
+        [
+          11,
+          0,
+          80.272
+        ],
+        [
+          12,
+          0,
+          87.776
+        ],
+        [
+          13,
+          1,
+          95.296
+        ],
+        [
+          14,
+          0,
+          102.816
+        ],
+        [
+          15,
+          2,
+          110.336
+        ],
+        [
+          16,
+          1,
+          117.856
+        ],
+        [
+          17,
+          3,
+          125.36
+        ]
+      ],
+      "warm_s": 40.0,
+      "basis_notes": [
+        "Host carrier: Orbit slot 12 (GRAIN chord family; Orbit A = GRAIN/PHYS/GRAIN). Slot-12 Motion/look/food FX stay the slot's; group-A lead tame is ON and the 12 ms Orbit strum applies per firmware (host artifacts).",
+        "Groove: kick 1 + soft hats rendered as offbeats (soft-hat pattern unquantified).",
+        "NOT RENDERED as separate artifacts: group B/C 'clearer/darker clouds' (B chord non-GRAIN for contrast) \u2014 B/C lead/bass cells are not fully specified in the doc; canonical = group A GRAIN cloud only."
+      ],
+      "choices": [
+        {
+          "param": "carrier slot",
+          "value": 12,
+          "kind": "host_choice",
+          "reason": "GRAIN chord family (Orbit A is the GRAIN reference).",
+          "open_item": null
+        }
+      ],
+      "provenance_source": "PROPOSALS-MUSE-R2.md (Muse independent Round 2 slate)",
+      "status": "DELIVERED",
+      "cross_check": {
+        "status": "BLOCKED",
+        "criterion": "per-second RMS agreement (median<=0.05dB, max<=0.5dB, no run>=3s over 0.1dB)",
+        "median_db": 0.297,
+        "max_db": 1.153,
+        "max_at_s": 131,
+        "n_over_0_1db": 103,
+        "max_run_over_0_1db": 22,
+        "n_sec": 132,
+        "shift_max": {
+          "-1": 3.784,
+          "0": 1.153,
+          "1": 3.355
+        },
+        "identity": "PASS (level name, BPM, engines, presets, kit all match host spec)",
+        "staging": "PASS (peak within 0.0005 dB of host)",
+        "note": "RMS disagreement is a different PERFORMANCE (different game evolution), not a different piece or broken DSP. See RENDER-LOG.md cross-check section for the elimination log."
+      },
+      "held": true,
+      "held_note": "Cross-check note (parent decision \u2014 this track IS delivered): the host render passes all artifact gates (config check, cycle coverage, engine DUMP). The WASM bench cross-check\u2019s performance-identity criterion was retired because the WASM bench plays a different performance of the same piece while entry identity, DSP staging, game clock and determinism all agree (full elimination log in renders/RENDER-LOG.md). The manifest\u2019s delivery_hold flag is superseded by this decision; the track is not hidden.",
+      "played_sessions": []
+    }
+  ],
+  "blocked": [],
+  "pairs": [],
+  "row_index": [
+    {
+      "row_index": 30,
+      "round": 1,
+      "author": "Muse",
+      "original_title": "Kalimba Nocturne",
+      "disposition": "render",
+      "artifact_ids": [
+        "muse-r1-kalimba-nocturne"
+      ]
+    },
+    {
+      "row_index": 32,
+      "round": 1,
+      "author": "Muse",
+      "original_title": "Night Drive (Warm)",
+      "disposition": "render",
+      "artifact_ids": [
+        "muse-r1-night-drive-warm"
+      ]
+    },
+    {
+      "row_index": 36,
+      "round": 1,
+      "author": "Muse",
+      "original_title": "Desert Hymn",
+      "disposition": "render",
+      "artifact_ids": [
+        "muse-r1-desert-hymn"
+      ]
+    },
+    {
+      "row_index": 40,
+      "round": 2,
+      "author": "Muse",
+      "original_title": "Acid Line",
+      "disposition": "render",
+      "artifact_ids": [
+        "muse-r2-acid-line"
+      ]
+    },
+    {
+      "row_index": 50,
+      "round": 2,
+      "author": "Muse",
+      "original_title": "Open Cloud (the GRAIN-voicing piece)",
+      "disposition": "render",
+      "artifact_ids": [
+        "muse-r2-open-cloud-the-grain-voicing-piece"
+      ]
+    },
+    {
+      "row_index": 59,
+      "round": 1,
+      "author": "Claude",
+      "original_title": "Lowrider Sunset",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r1-lowrider-sunset"
+      ]
+    },
+    {
+      "row_index": 60,
+      "round": 1,
+      "author": "Claude",
+      "original_title": "Velvet Cathedral",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r1-velvet-cathedral"
+      ]
+    },
+    {
+      "row_index": 68,
+      "round": 2,
+      "author": "Claude",
+      "original_title": "Acid Rain",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r2-acid-rain"
+      ]
+    },
+    {
+      "row_index": 69,
+      "round": 2,
+      "author": "Claude",
+      "original_title": "Electro Glide",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r2-electro-glide"
+      ]
+    },
+    {
+      "row_index": 72,
+      "round": 2,
+      "author": "Claude",
+      "original_title": "Iron Lung",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r2-iron-lung"
+      ]
+    },
+    {
+      "row_index": 76,
+      "round": 2,
+      "author": "Claude",
+      "original_title": "Talking Drums",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r2-talking-drums"
+      ]
+    },
+    {
+      "row_index": 78,
+      "round": 2,
+      "author": "Claude",
+      "original_title": "Seaside Chapel",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r2-seaside-chapel"
+      ]
+    },
+    {
+      "row_index": 79,
+      "round": 2,
+      "author": "Claude",
+      "original_title": "Koto Garden",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r2-koto-garden"
+      ]
+    },
+    {
+      "row_index": 80,
+      "round": 2,
+      "author": "Claude",
+      "original_title": "Robot Lullaby",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r2-robot-lullaby"
+      ]
+    },
+    {
+      "row_index": 81,
+      "round": 2,
+      "author": "Claude",
+      "original_title": "Steel Pan Calypso",
+      "disposition": "render",
+      "artifact_ids": [
+        "claude-r2-steel-pan-calypso"
+      ]
+    }
+  ]
+}
+</script>
+<!-- END DATA -->
+<script src="app.js"></script>
+</body>
+</html>
