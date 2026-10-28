@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Lo-Fi keeps — as on the FM1</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; line-height: 1.45; }
+h1 { font-size: 1.4em; } h2 { font-size: 1.15em; margin-top: 1.6em; }
+.clip { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.clip audio { width: 100%; }
+.small { color: #555; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<h1>Open Lo-Fi keeps — as on the FM1</h1>
+<p class="small">Britton's keeps (1, 4, 5, 7, 8, 9, 10), rendered through the real packed
+writer and real SLOOP mix_block — the same path as the Phase 2 packet.
+8 bars each, group A, gain-matched to −23.0 dBFS RMS. Compare with the
+<a href="../openlofi-top10/">originals page</a>.
+Excluded per Britton's keeps: Last Call in C Minor, Dust on the Morning Keys,
+Basement Groove 86.</p>
+
+<div class="clip">
+<h2>1. Candlelit at 70 BPM — FM1 render</h2>
+<p class="small">70 BPM · 27.43 s · i–VI–III–VII (A minor host; draft D minor, transposed) ·
+soft jazz, boundary fill on bars 4 and 8.</p>
+<audio controls preload="none" src="candlelit.mp3"></audio>
+<p class="small">Listen for: slow intimate jazz vs the original's keys. Does the vamp-or-moving question matter here?</p>
+</div>
+
+<div class="clip">
+<h2>2. Temple at Dawn — FM1 render</h2>
+<p class="small">85 BPM (placeholder — analysis was ambiguous, 63 vs 85) · 22.59 s ·
+i–VI–i–VI (A minor host) · bells/pads only, no drums, no fills.</p>
+<audio controls preload="none" src="temple.mp3"></audio>
+<p class="small">Listen for: does the bell identity survive with no drums? If the tempo feels wrong, that is the known open question.</p>
+</div>
+
+<div class="clip">
+<h2>3. Satellite Lullaby — FM1 render</h2>
+<p class="small">77 BPM · 24.94 s · Am7 vamp (A minor host) · chord-only lullaby, no drums, no fills.
+Chorus sections are denser and an octave higher, not a new harmony.</p>
+<audio controls preload="none" src="satellite.mp3"></audio>
+<p class="small">Listen for: lullaby or too static? This is the cleanest plan of the set.</p>
+</div>
+
+<div class="clip">
+<h2>4. Cafe Da Tarde — FM1 render</h2>
+<p class="small">77 BPM · 24.94 s · i–iv–VI–V (A minor host) · bossa proposal:
+clave hats + kick + soft snare. No fills (bossa breathes).</p>
+<audio controls preload="none" src="cafe.mp3"></audio>
+<p class="small">Listen for: does it actually feel like bossa, or just a soft groove with hats? The clave was never verified from the original.</p>
+</div>
+
+<div class="clip">
+<h2>5. 2 AM Debug Loop — FM1 render</h2>
+<p class="small">81 BPM · 23.70 s · i–VI–i–VI (A minor host) · lo-fi loop, boundary fill on bars 4 and 8.</p>
+<audio controls preload="none" src="2am.mp3"></audio>
+<p class="small">Listen for: loop-native feel. If it duplicates Candlelit's vamp, that is the known Dm-cluster risk.</p>
+</div>
+
+<div class="clip">
+<h2>6. Pixel Quest Save Point — FM1 render</h2>
+<p class="small">83 BPM (166 double-time alternative was flagged) · 23.13 s ·
+Am(maj7) vamp (A minor host, exact root) · rising/falling arp, minimal drums, no fills.</p>
+<audio controls preload="none" src="pixel.mp3"></audio>
+<p class="small">Listen for: save-point sting or just a loop? All tracks share the group-A host sound here, so the square-wave lead is an approximation, not a chiptune preset.</p>
+</div>
+
+<div class="clip">
+<h2>7. Sidewalk Slow Jam — FM1 render</h2>
+<p class="small">87 BPM · 22.07 s · I–V–vi–IV (A major host; draft D major, transposed) ·
+slow jam, cycle-4 fill on bars 4 and 8.</p>
+<audio controls preload="none" src="sidewalk.mp3"></audio>
+<p class="small">Listen for: major or minor? This render uses the MAJOR version as drafted.
+If you hear a minor centre, this plan must be rebuilt in minor before any further use.</p>
+</div>
+
+<h2>Method and limits (read before judging)</h2>
+<ul>
+<li>Each clip's patterns come from a packed blob generated from the draft plan, written by the real packed writer, and rendered through real mix_block in the 6c1be4b tree. Event dumps were checked programmatically: 8 bars, correct slots, chords, lead/bass steps, drum lanes, fills only on bars 4 and 8, all caps hold.</li>
+<li>All clips are deterministic: each WAV is byte-identical across two renders. Snapshot guard passed (7 checks each).</li>
+<li>Host transposition: the packed writer takes root/scale from the host level, not the blob. D-minor drafts render in A minor (Amen host), the D-major draft in A major (Musicbox host). Harmony shape is preserved, pitch is transposed.</li>
+<li>Progressions and drums are PROPOSALS from the analysis, not transcriptions — chord loops were not measurable from the Suno mixes, and drum transcription failed. What you hear is the plan, not a verified copy of the original.</li>
+<li>All tracks share the group-A host tracks, as in Phase 2. Timbre differences come from patterns and register, not per-track presets.</li>
+<li>Live game-tick timing, FORM section lengths, Motion/FEEL, and per-track presets are not in these clips. These are listening renders, not production levels: no merge, pointer move, or flash follows from them.</li>
+</ul>
+<p class="small">Scratch branch: scratch/open-lofi-renders @ 214c372 (blobs, renderer, dumps, checks).
+Originals: <a href="../openlofi-top10/">openlofi-top10</a>.</p>
+</body>
+</html>
