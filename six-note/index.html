@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Six-note real-DSP audition — FOUROBOROS v1 gate</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; line-height: 1.5; color: #111; background: #fff; }
+h1 { font-size: 1.4em; } h2 { font-size: 1.15em; margin-top: 2em; border-top: 1px solid #ccc; padding-top: 0.5em; }
+.clip { margin: 1.2em 0; } .clip b { display: block; } audio { width: 100%; margin-top: 0.3em; }
+.meta { font-size: 0.85em; color: #444; } .note { background: #f4f4f4; padding: 10px; border-left: 4px solid #555; }
+code { font-size: 0.9em; }
+</style>
+</head>
+<body>
+<h1>Six-note real-DSP audition</h1>
+<p><b>Gate:</b> bundled real-DSP 4/5/6-note audition + dense stress test for exact candidate
+<code>6a61aa0139ce70e38550e4b4e9aa8dd059974da8</code>
+(branch <code>work/v1-six-note-xip-opt-muse</code>, parent <code>8795604</code>).
+Independent qualification (#31 comment 6464428544) passed this candidate <b>to this audition only</b>.
+This page is <b>not</b> musical adoption, production promotion, or permission to merge, flash, move pointers, tag, or release.
+Listen, then decide in chat — no tap on this page counts as adoption.</p>
+<p><b>Method (all clips):</b> writer-produced patterns (real <code>oro_write</code>, game path, plan + card) through the
+real sequencer (<code>seq_step</code> / <code>seq_ratchets</code> / voice allocator, inside <code>mix_block</code>) and the real SLOOP
+<code>mix_block</code> DSP, rendered on host at 44100 Hz. Fixed master (2048), 90 BPM straight, 2 bars each (5.3 s),
+group-A host tracks, level 0 (Lofi, root C), plan degree 0 all slots — except <code>p4ord</code>/<code>p6zero</code>
+(default host tracks, no OROBOROS arm, flag off) and <code>p6lvl</code> bar 2 (trio authored, level 2).
+No per-clip normalization: louder clips are louder because more voices sound, not because of a mix change.
+Every clip passed its harness asserts (writer pitch classes, sidecar shape, snapshot guard) and its audio analysis
+(Goertzel pitch presence, voice logs, RMS) before publishing. PCM hashes below are the WAV payload hashes
+(header excluded); the full analysis is posted to #31 with this page.</p>
+<div class="note">
+<b>Read before listening.</b>
+<ul>
+<li><code>p4ord</code>, <code>p6zero</code>, and <code>p6lvl</code> are much quieter (−33, −33, −35 dBFS vs −20 for the rest).
+Turn the volume up for those three. The quietness is the host-track/trio timbre, not a six-note effect.</li>
+<li><code>p6rest</code> sounds <b>identical</b> to <code>p6</code> (same PCM hash). That is expected, not a duplicate error:
+in this phrase the chord gate already ended before the REST step, so REST and an empty step both release —
+and release is what REST does. The REST proof is the <b>contrast</b> with <code>p6tie</code> (sustained) plus the
+voice logs (REST step: seq empty, voices in release, freed by the next step).</li>
+<li>REST audio after note-off is release fade + FX tail (reverb/delay), which legitimately sustains ~2 steps
+at ~30% of chord level before decaying. Stuck notes would sustain indefinitely; these decay to &lt;10% within
+2 steps. Voice logs (freed by step 2) prove the notes are off; the tail is FX, not stuck voices.</li>
+<li>A true mid-write authored fail (goto fail → clear_tracks, same function as the proven pre-clear) is
+code-reviewed, not separately audio-proven here: triggering it would require corrupting a valid blob in place,
+which the host harness cannot do without faulting on its own read-only blob data. The reachable fail/fallback
+paths (every <code>oro_write</code> pre-clear, level change + authored write) <b>are</b> audio-proven below.</li>
+<li>Still outstanding (not hidden): full <code>run_tests.sh</code> soak; <code>form_bank_v1</code> line-64 failure is
+unchanged from base (pre-existing, not a candidate regression); authored card blob format is a separate
+deliverable (this candidate's six-note steps come from the game path with <code>plan_card</code>).</li>
+</ul>
+</div>
+
+<h2>A. Ordinary four-note preservation</h2>
+<div class="clip"><b>1. p4 — 4-note control, OROBOROS (MIN11, card 4)</b>
+<span class="meta">RMS −20.4 dBFS · PCM 1f14621ff2a75b7f · identical on 6a61aa0, 8795604, and 31cbe3a (pre-six-note base)</span>
+<br>Listen for: the 4-note chord {C, Eb, Bb, F} at cols 0, 4, 8, 12. The 5th (G) and 9th (D) that appear in the
+6-note clips must be <b>absent</b> here. Voice logs: step only, sidecar empty.
+<audio controls preload="none" src="p4.mp3"></audio></div>
+<div class="clip"><b>2. p4ord — 4-note ordinary, flag off (manual steps, no OROBOROS)</b>
+<span class="meta">RMS −33.3 dBFS (quiet — turn up) · PCM f72e181878d22237 · identical on 6a61aa0, 8795604, and 31cbe3a</span>
+<br>Listen for: the same 4-note idea on the ordinary SLOOP path (unified sequencer, flag off, no sidecar).
+Proves unification did not change ordinary audio either.
+<audio controls preload="none" src="p4ord.mp3"></audio></div>
+
+<h2>B. True 5- and 6-note chord steps reach DSP</h2>
+<div class="clip"><b>3. p5 — 5-note, MAJ9, card 5</b>
+<span class="meta">RMS −20.3 dBFS · PCM 592f75a75617f8c5 · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: five distinct pitches {C, E, G, B, D} — the 5th tone (G, sidecar note 0) sounding with the step notes.
+Sidecar note 1 is empty (0xFF): 5 notes, not 6.
+<audio controls preload="none" src="p5.mp3"></audio></div>
+<div class="clip"><b>4. p6 — 6-note, MIN11, card 6</b>
+<span class="meta">RMS −19.9 dBFS · PCM 02915240dd6d97ea · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: six distinct pitches {C, Eb, G, Bb, D, F} sounding <b>simultaneously</b> — not an arpeggio,
+not 4 notes plus a borrowed bass. Bass is not counted as a chord voice here (chord track only).
+Voice logs: seq_notes and voices both list all 6 at every chord step.
+<audio controls preload="none" src="p6.mp3"></audio></div>
+<div class="clip"><b>5. p6s13 — 6-note, SUS13, card 6</b>
+<span class="meta">RMS −20.3 dBFS · PCM 7a1ac90c390eea6c · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: the 13th (A) as the 6th tone — the 6th tone is quality-defined, not a fixed pitch.
+Six pitches {C, F, G, Bb, D, A}.
+<audio controls preload="none" src="p6s13.mp3"></audio></div>
+
+<h2>C. Articulation across voices 5–6</h2>
+<div class="clip"><b>6. p6rat — 6-note with ratchets on all 6 notes (3 hits each)</b>
+<span class="meta">RMS −18.7 dBFS · PCM bea4eda2f7903d42 · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: each chord step re-triggering 3 times (ratchet hits on step notes <b>and</b> sidecar notes).
+Envelope analysis: each third of the step re-excites (no silent thirds, no dropped sidecar re-triggers).
+<audio controls preload="none" src="p6rat.mp3"></audio></div>
+<div class="clip"><b>7. p6tie — 6-note with TIE steps after each chord</b>
+<span class="meta">RMS −16.8 dBFS · PCM be293144d9d2441d · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: all 6 notes <b>holding</b> through the TIE steps — no re-attack, no drop, no gap.
+Voice logs: 6 gated notes held through every TIE step. Compare with clip 8 (REST releases).
+<audio controls preload="none" src="p6tie.mp3"></audio></div>
+<div class="clip"><b>8. p6rest — 6-note with REST steps after each chord</b>
+<span class="meta">RMS −19.9 dBFS · PCM 02915240dd6d97ea (identical to p6 — see note above)</span>
+<br>Listen for: nothing new after each chord — REST releases (voice logs: seq empty at REST, voices in release,
+freed by the next step). The audible tail is release + FX, decaying to &lt;10% within 2 steps. Contrast with clip 7.
+<audio controls preload="none" src="p6rest.mp3"></audio></div>
+<div class="clip"><b>9. p6slide — 6-note bar 1 (last chord flagged SLIDE) → 4-note bar 2, same root</b>
+<span class="meta">RMS −20.0 dBFS · PCM 247b5451a12b14d3 · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: bar 1 (6 notes) sliding into bar 2 (4 notes) — the 2 sidecar-only pitches (G, D) <b>drop out</b>
+at the bar line while the 4 common pitches hold (legato, no re-attack on them). Slide release of sidecar notes, proven.
+<audio controls preload="none" src="p6slide.mp3"></audio></div>
+
+<h2>D. No stale sidecar state</h2>
+<div class="clip"><b>10. p6rw — 6-note bar 1 → rewrite card 4 bar 2</b>
+<span class="meta">RMS −20.1 dBFS · PCM 8a8f82f72da246f9 · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: bar 2 has only 4 notes (G, D gone). Rewrite clears the sidecar before writing.
+<audio controls preload="none" src="p6rw.mp3"></audio></div>
+<div class="clip"><b>11. p6exit — 6-note bar 1 → EXIT → re-enter card 4 bar 2</b>
+<span class="meta">RMS −20.1 dBFS · PCM 46bee6c59c060d27 · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: bar 2 has only 4 notes. EXIT clears the sidecar (state assert: all 0xFF, flag 0) and KEEP does not
+restore sidecar state.
+<audio controls preload="none" src="p6exit.mp3"></audio></div>
+<div class="clip"><b>12. p6plant — 6-note bar 1 → plant foreign stale pitches (90, 94) → rewrite card 4 bar 2</b>
+<span class="meta">RMS −20.1 dBFS · PCM 8a8f82f72da246f9 (identical to p6rw — planted pitches never sound)</span>
+<br>Listen for: bar 2 is exactly the clean card-4 bar (same PCM as clip 10). The planted high pitches (90, 94)
+never appear in bar 2 audio or state.
+<audio controls preload="none" src="p6plant.mp3"></audio></div>
+<div class="clip"><b>13. p6lvl — 6-note bar 1 (level 0 game) → plant stale → level 2 authored write bar 2</b>
+<span class="meta">RMS −35.1 dBFS (quiet, sparse trio chord — turn up) · PCM eb593f33093db95a · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: bar 2 is the trio authored chord (not silence, not the planted pitches). Level change +
+authored write clears the planted sidecar (state assert: all 0xFF).
+<audio controls preload="none" src="p6lvl.mp3"></audio></div>
+<div class="clip"><b>14. p6zero — fresh boot, sidecar zero-init, manual 4-note chord, flag off</b>
+<span class="meta">RMS −33.3 dBFS (quiet — turn up) · PCM f72e181878d22237 (identical to p4ord — same manual chord)</span>
+<br>Listen for: only the 4 manual notes. Zero sidecar can never sound: merge is gated on the flag (0 until ENTER)
+and every write clears to 0xFF before populating. Harness asserts zero-init on this candidate (reference 8795604
+is 0xFF-init instead — the intended XIP change — with identical audio, proving init value makes no audible difference).
+<audio controls preload="none" src="p6zero.mp3"></audio></div>
+
+<h2>E. Dense stress — allocator behavior (bass/lead stealing = BLOCK)</h2>
+<div class="clip"><b>15. p6dense — 6-note chord + bass (C2) + lead (C5) at the same columns, chord TIE-held, roots differ per column</b>
+<span class="meta">RMS −16.3 dBFS · PCM d2ddb11652bf3f45 · identical on 6a61aa0 and 8795604</span>
+<br>Listen for: bass and lead present at every chord step, with the full 6-note chord. Voice logs at every chord step:
+8 gated voices (6 new chord + bass + lead), previous chord's non-shared pitches <b>gone</b> (stolen, chord-first),
+bass and lead <b>never</b> stolen. If bass or lead had been stolen, this clip would be a BLOCK, not a pass —
+it is not: bass 36 and lead 72 are gated present at all 8 chord steps in both bars.
+<audio controls preload="none" src="p6dense.mp3"></audio></div>
+
+<p><b>What this gate does not claim:</b> musical adoption (Britton's ears decide), production promotion,
+final V1 qualification, or any merge/flash/pointer/tag/release. If listening reveals a code repair, the repaired
+exact SHA requires a new qualified non-author check before adoption. Harness source, logs, WAVs, and analysis
+are in the audition evidence posted to #31 with this page.</p>
+</body>
+</html>
