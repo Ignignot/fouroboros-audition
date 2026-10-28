@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sub-bass variants — 2am, cafe, candlelit (listening only)</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; line-height: 1.5; color: #111; background: #fff; }
+h1 { font-size: 1.4em; } h2 { font-size: 1.15em; margin-top: 2em; border-top: 1px solid #ccc; padding-top: 0.5em; }
+.clip { margin: 1.2em 0; } .clip b { display: block; } audio { width: 100%; margin-top: 0.3em; }
+.meta { font-size: 0.85em; color: #444; } .note { background: #f4f4f4; padding: 10px; border-left: 4px solid #555; }
+code { font-size: 0.9em; }
+</style>
+</head>
+<body>
+<h1>Sub-bass variants — 2am, cafe, candlelit</h1>
+<p><b>Task:</b> bounded V1 sub-bass REVIEW (not BLOCK, not a redesign, no global boost).
+Variants are <b>listening candidates only</b> — no production change, no merge, no pointer move.
+Controls are the v2 originals (byte-identical MP3s from the v2 page).
+All clips gain-matched to −23.0 dBFS RMS, so A/B loudness is fair; shares below are
+gain-invariant (Welch spectra, WAV vs WAV, same chain). Kick steps are identical in
+patterns for all three (drums untouched; 2am/cafe patterns byte-identical, only the bass
+preset differs; candlelit differs only in chord velocity). Kick voice itself is unchanged
+(same kit, steps, levels); shared FX tails may shift slightly with the mix — kick clarity
+in the mix is for your ears. Listen, then decide in chat — no tap here counts as a decision.</p>
+
+<h2>1. Cafe — bass preset swap (weak sub → upright sustain)</h2>
+<p><b>Change (one):</b> bass PHYS PLUCK BASS → SAMPLE UP BASS (upright), same notes, same rhythm.
+Pluck bass decays fast (weak sustained sub); upright rings longer. Bossa-authentic (upright
+is the bossa bass), not a synth sub.</p>
+<p class="meta">Measured: sub (30–80 Hz) 7.0% → 31.9% (healthy range, cf. Boom Bap 33–37%);
+masking ratio (150–300 / sub) 3.23 → 0.33; 150–300 share 22.7% → 10.6%.
+Per-hit attacks similar (both plucked); the gain is sustain — sub present between hits.</p>
+<div class="clip"><b>Cafe control (v2 original)</b><audio controls preload="none" src="cafe-control.mp3"></audio></div>
+<div class="clip"><b>Cafe variant (upright bass)</b><audio controls preload="none" src="cafe-variant.mp3"></audio></div>
+<p>Listen for: bass notes ringing longer and deeper under the vocal/keys, without the kick
+getting muddy. Does the upright fit bossa, or does it change cafe's character?</p>
+
+<h2>2. 2am — bass preset swap (weak sub → analog sub)</h2>
+<p><b>Change (one):</b> bass DIGITAL FM BASS → ANALOG SUB BASS, same notes, same rhythm.
+FM bass fundamental is weak per hit; analog sub is sine-like (strong fundamental, few harmonics,
+so it adds sub without adding low-mid crowding — 2am chords already dominate 150–300 Hz).</p>
+<p class="meta">Measured: sub 6.9% → 7.9% (modest); masking ratio 6.46 → 5.39;
+per-hit 55 Hz fundamental +0.2 to +1.2 dB (small, consistent).
+Honest limit: 2am bass plays only 3 notes/bar, gate-limited, so time-averaged share stays low
+regardless of timbre — sparsity caps share. If this variant is not enough, the next lever would
+be density, sustain, or level (bigger changes, not in this packet).</p>
+<div class="clip"><b>2am control (v2 original)</b><audio controls preload="none" src="2am-control.mp3"></audio></div>
+<div class="clip"><b>2am variant (analog sub bass)</b><audio controls preload="none" src="2am-variant.mp3"></audio></div>
+<p>Listen for: when the bass hits, is the sub felt more (per-hit depth), even though the bass
+line stays sparse? Is the small gain enough, or does 2am still feel sub-light?</p>
+
+<h2>3. Candlelit — chord dynamics down (masked sub → unmask, not boost)</h2>
+<p><b>Change (one):</b> every chord note SOFT (velocity 72) → GHOST (velocity 42). No note, register,
+rhythm, or timbre change; bass, lead, and drums untouched. Chords softer (dynamics), sub
+relatively clearer — unmasking, not a sub boost.</p>
+<p class="meta">Measured: sub 20.4% → 22.7% (modest); masking ratio 2.11 → 1.92;
+bass 55 Hz fundamental +3.1 dB at the loudest step (bass+chord+lead together — likely less bus
+clipping with softer chords; inference, not proven). Honest limit: candlelit chords play only
+2 steps/bar and the lead dominates 150–300 Hz (lead unchanged), so softening chords moves shares
+only a little. Candlelit sub was already decent (20%); this is a gentle unmasking.</p>
+<div class="clip"><b>Candlelit control (v2 original)</b><audio controls preload="none" src="candlelit-control.mp3"></audio></div>
+<div class="clip"><b>Candlelit variant (ghost chords)</b><audio controls preload="none" src="candlelit-variant.mp3"></audio></div>
+<p>Listen for: is the sub/bass clearer under the chords, without the harmony getting faint?
+Chords at ghost velocity are soft but present — too soft, or just right?</p>
+
+<p><b>What this packet does not claim:</b> production adoption, a final sub-bass PASS, or that
+these are the only possible fixes. If a variant sounds wrong, say so and it is dropped; if
+2am needs more than a timbre swap, that is a separate, bigger decision (density/sustain/level),
+not smuggled into this packet. Originals: <a href="../openlofi-fm1-v2/">open-lofi v2 page</a>.</p>
+</body>
+</html>
