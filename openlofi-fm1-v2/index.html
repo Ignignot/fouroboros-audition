@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Lo-Fi keeps — FM1 v2 (warmer, distinctive)</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; line-height: 1.45; }
+h1 { font-size: 1.4em; } h2 { font-size: 1.15em; margin-top: 1.6em; }
+.clip { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.clip audio { width: 100%; }
+.small { color: #555; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<h1>Open Lo-Fi keeps — FM1 v2 (warmer, distinctive)</h1>
+<p class="small">A/B against <a href="../openlofi-fm1/">v1</a> and the
+<a href="../openlofi-top10/">originals</a>. Same notes, progressions,
+drums, fills and BPM as v1 — only two things changed: the lead is an
+octave lower, and each track now gets its own real SLOOP instrument
+pack instead of sharing one host sound. 8 bars each, gain-matched to
+−23.0 dBFS RMS, so loudness is comparable across v1/v2.</p>
+<p class="small"><b>Why v1 sounded tinny and samey:</b> 6 of 7 v1 tracks shared
+one host sound (Amen group A: vibes lead, atmos pad, jungle kit), and
+both v1 lead sounds are metallic/bell-like, played an octave up and
+stacked with pads. That is the same bright-lead mechanism as the
+earlier Orbit "ouch". V2 fixes it with instruments already in the FM1
+firmware — no new samples, no invented presets.</p>
+
+<div class="clip">
+<h2>1. Candlelit at 70 BPM — v2</h2>
+<p class="small">Now: Rhodes lead + dusty piano chords + LO-FI kit (Lofi Jazz A).
+Lead 45–62 (was 57–74). High-frequency share down 66% vs v1.</p>
+<audio controls preload="none" src="candlelit.mp3"></audio>
+<p class="small">Listen for: warm jazz keys instead of metallic vibes. Closest to the original's warmth?</p>
+</div>
+
+<div class="clip">
+<h2>2. Temple at Dawn — v2</h2>
+<p class="small">Now: Koto lead + CZ strings + ACOUSTIC kit (Clockwork B).
+Lead 45–64 (was 57–76). High-frequency share down 49% vs v1.
+85 BPM still a placeholder (63 vs 85 ambiguous).</p>
+<audio controls preload="none" src="temple.mp3"></audio>
+<p class="small">Listen for: Asian plucked bells, warmer and lower. Still too bell-like, or right now?</p>
+</div>
+
+<div class="clip">
+<h2>3. Satellite Lullaby — v2</h2>
+<p class="small">Now: Harp lead + choir pad + bell-tree bass (Musicbox C).
+Lead 45–60 (was 57–72; chorus still an octave above verse, just lower).
+High-frequency share down 70% vs v1 — the biggest drop.</p>
+<audio controls preload="none" src="satellite.mp3"></audio>
+<p class="small">Listen for: lullaby warmth instead of shrill bells. Does the chorus lift still read?</p>
+</div>
+
+<div class="clip">
+<h2>4. Cafe Da Tarde — v2</h2>
+<p class="small">Now: Soul vocal lead + soft keys + LATIN kit (Bossa A/B).
+Lead 45–60 (was 57–72). High-frequency share down 39% vs v1.</p>
+<audio controls preload="none" src="cafe.mp3"></audio>
+<p class="small">Listen for: bossa warmth with a vocal lead. Does it still feel like cafe, or too vocal now?</p>
+</div>
+
+<div class="clip">
+<h2>5. 2 AM Debug Loop — v2</h2>
+<p class="small">Now: Thumb piano lead + jazz organ + JAZZ kit (Lofi B).
+Lead 45–60 (was 57–72). High-frequency share down only 10% vs v1 —
+the smallest drop. If this one still feels bright, say so; it is the
+likeliest remaining problem child.</p>
+<audio controls preload="none" src="2am.mp3"></audio>
+<p class="small">Listen for: plucky lo-fi loop, distinct from Candlelit's Rhodes. Samey with Candlelit still?</p>
+</div>
+
+<div class="clip">
+<h2>6. Pixel Quest Save Point — v2</h2>
+<p class="small">Now: Game lead + chip chords + CHIP kit (Chiptune A).
+Lead 45–56 (was 57–68). High-frequency share down only 7% vs v1 —
+on purpose: chiptune is supposed to stay bright, just lower and
+chunkier instead of shrill.</p>
+<audio controls preload="none" src="pixel.mp3"></audio>
+<p class="small">Listen for: save-point sting, now in the chiptune pack it always wanted. Too bright still, or right for pixel?</p>
+</div>
+
+<div class="clip">
+<h2>7. Sidewalk Slow Jam — v2</h2>
+<p class="small">Now: M1 piano lead + trio dub chords + D.HOUSE kit (Deep House A).
+Lead 57–73 (was 69–85). High-frequency share down 35% vs v1.
+Still the MAJOR version as drafted — if you hear minor, it needs
+rebuilding in minor.</p>
+<audio controls preload="none" src="sidewalk.mp3"></audio>
+<p class="small">Listen for: warm major slow jam. You said sidewalk was less bad than the first three on brightness — is v2 now in line with the rest?</p>
+</div>
+
+<h2>What changed, exactly (and what did not)</h2>
+<ul>
+<li>Lead −12 semitones on every note (dump-checked: bass, chords, drums, slots, fills byte-identical to v1).</li>
+<li>Instruments: each track's bass/lead/chord engines + presets + drum kit taken verbatim from SLOOP's existing level profiles (see per-track notes above). No new data, no invented presets.</li>
+<li>Nothing else: same progressions (still proposals, not transcriptions), same host keys (A minor / A major), same BPM, same fills, same 8 bars.</li>
+<li>Verification: all 7 WAVs deterministic across two renders, snapshot PASS, dump checks PASS, MP3s gain-matched −23.0 dBFS. Brightness drop measured (6–12 kHz energy share), not just claimed.</li>
+<li>These are still listening renders, not production levels. The per-track instrument choices here are a demonstration in the renderer — they are NOT yet assigned to any production level or kit. Nothing merged, no pointer moved, no flash, no composition-core change.</li>
+</ul>
+<p class="small">Scratch branch: scratch/open-lofi-renders @ ef41eff (v2 blobs, renderer, dumps, checks).
+V1: <a href="../openlofi-fm1/">openlofi-fm1</a>. Originals: <a href="../openlofi-top10/">openlofi-top10</a>.</p>
+</body>
+</html>
