@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FOUROBOROS V1 Phase 2 — Trio decisions</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; line-height: 1.45; }
+h1 { font-size: 1.4em; } h2 { font-size: 1.15em; margin-top: 1.6em; }
+.clip { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.clip audio { width: 100%; }
+.small { color: #555; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<h1>FOUROBOROS V1 Phase 2 — Trio decisions</h1>
+<p class="small">8 clips, 8 bars each, sound group A, gain-matched to −23.0 dBFS RMS so loudness does not decide anything.
+Patterns are the real packed writer's output, rendered through the real SLOOP mix_block (bridge protocol).
+No agent has picked a winner. Britton decides.</p>
+
+<h2>Decisions needed</h2>
+<ol>
+<li><b>Amen:</b> does i–VI make it move harmonically, or does the vamp still read as static? Do the fills sound like pickups, or clutter?
+  Listen: vamp → i–VI no fills → i–VI + fills.</li>
+<li><b>Boom Bap:</b> do the fills close it? If not, does snake-choice variation in cycle 2 help? Does the closing gesture land?
+  Listen: baseline → fills → choice → closing, in that order.</li>
+<li><b>Musicbox:</b> unchanged control. It should still sound PASS. If it sounds different, that is a regression flag, not a new decision.</li>
+</ol>
+
+<div class="clip">
+<h2>1. Amen — production vamp (control)</h2>
+<p>Production harmony (0,0,0,0): Am7, Am7, Am(maj7), Am7. Same phrases as the i–VI clips, no fills. 11.16 s, 172 BPM.</p>
+<audio controls preload="none" src="amen-vamp.mp3"></audio>
+<p class="small">Listen for: one-chord static vs movement. This is what production sounds like today.</p>
+</div>
+
+<div class="clip">
+<h2>2. Amen — i–VI, no fills</h2>
+<p>Test variant only: Am7, Fmaj7, Am7, Fmaj7. Chorus bass third and lead stabs re-resolve under Fmaj7 (expected, not a bug). No fills. 11.16 s.</p>
+<audio controls preload="none" src="amen-ivi-nofill.mp3"></audio>
+<p class="small">Listen for: does the Fmaj7 bar feel like movement, or does the line wander?</p>
+</div>
+
+<div class="clip">
+<h2>3. Amen — i–VI + fills (bars 4 and 8 only)</h2>
+<p>Same as clip 2, plus the authored section-boundary fill (snare 14, kick 15, snare 15) on bars 4 and 8 only, per the fills brief. 11.16 s.</p>
+<audio controls preload="none" src="amen-ivi-fills.mp3"></audio>
+<p class="small">Listen for: pickups into the next cycle, or clutter? Note the fill stacks kick + snare on step 15 in chorus bars.</p>
+</div>
+
+<div class="clip">
+<h2>4. Boom Bap — baseline (no fills, default rows)</h2>
+<p>The packed plan as gated: verse, verse-answer, chorus, chorus-answer, twice. No fills, default snake rows. 20.87 s, 92 BPM.</p>
+<audio controls preload="none" src="boombap-baseline.mp3"></audio>
+<p class="small">Listen for: the exact 4-bar repeat Britton flagged as needing more.</p>
+</div>
+
+<div class="clip">
+<h2>5. Boom Bap — fills first (option A, no plan change)</h2>
+<p>Same as baseline, plus the authored cycle-4 fill (snare 14, snare 15) on bars 4 and 8 only. Nothing in the plan changed. 20.87 s.</p>
+<audio controls preload="none" src="boombap-fills.mp3"></audio>
+<p class="small">Listen for: do the two snare pickups make the cycles feel finished? If yes, this may be all Boom Bap needs.</p>
+</div>
+
+<div class="clip">
+<h2>6. Boom Bap — snake-choice cycle variation (option B, no new content)</h2>
+<p>Cycle 1 is baseline. Cycle 2 uses snake rows 15, so authored degree alternatives vary (lead degrees shift within their authored sets; chorus bass third ↔ fifth). No fills, no new notes. 20.87 s.</p>
+<audio controls preload="none" src="boombap-choice.mp3"></audio>
+<p class="small">Listen for: does cycle 2 break the literal repeat enough, or is the variation too modest?</p>
+</div>
+
+<div class="clip">
+<h2>7. Boom Bap — closing gesture (option C, small plan change, scratch only)</h2>
+<p>Only the chorus-response section changes: bass reuses the root-only verse bass, drums thin to kick + snare (kick 0, snare 4, kick 10, snare 12; no hats), final lead event (step 13, root) is accented. No fills, default rows. 20.87 s.</p>
+<audio controls preload="none" src="boombap-closing.mp3"></audio>
+<p class="small">Listen for: does the cycle land instead of wrapping silently? This variant is scratch only — it is not in any candidate.</p>
+</div>
+
+<div class="clip">
+<h2>8. Musicbox Dream — unchanged control</h2>
+<p>Packed Musicbox as gated, no fills, no changes. 27.43 s, 70 BPM. Included as a regression anchor, not a new decision.</p>
+<audio controls preload="none" src="musicbox-control.mp3"></audio>
+<p class="small">Listen for: still PASS? Any change here would be a regression, not an improvement.</p>
+</div>
+
+<h2>Method and limits (read before judging)</h2>
+<ul>
+<li>Each clip's patterns were captured from the real packed writer on the Phase 1 qualified foundation (6c1be4b), then rendered through real mix_block in the same tree. Event dumps for every bar are in the #31 handoff; all variant isolations check out (only the intended bars differ).</li>
+<li>All clips are deterministic: each WAV is byte-identical across two renders. Snapshot guard passed (nothing rewrote a pattern mid-bar).</li>
+<li>Fills are isolated to bars 4 and 8, per the recorded fills brief. In live gameplay, Amen boundary fills would fire on every section change — denser fills are a plan decision, not a silent render choice.</li>
+<li>Live game-tick timing (FORM section lengths, autopilot, food) is harness-proven, not audio-proven here. Motion, FEEL, SEEDED and tame are not in this tree and are not in these clips.</li>
+<li>Option D (true second-cycle content) was NOT built: it needs a contract extension and ChatGPT architecture review first, plus Britton confirming development (not just endings) is the gap.</li>
+<li>Amen i–VI is a test variant. Production stays the vamp unless Britton adopts i–VI. The closing variant is scratch only.</li>
+</ul>
+<p class="small">Phase 2 scratch branch: scratch/v1-phase2-renders. Full hashes, dumps and checks are on issue #31.</p>
+</body>
+</html>
